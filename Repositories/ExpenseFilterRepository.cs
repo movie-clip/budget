@@ -107,7 +107,6 @@ namespace HomeCharts.Repositories
         
         public void RemoveFilters(string filter)
         {
-            // DELETE ... WHERE Id IN (@id0,@id1,...)
             const string sql = @"DELETE FROM YourTableName WHERE Id = @Id;";
 
             using var conn = GetConnection();

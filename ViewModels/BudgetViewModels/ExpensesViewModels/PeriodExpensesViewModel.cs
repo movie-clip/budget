@@ -50,7 +50,7 @@ namespace HomeCharts.ViewModels
             PeriodIncome = totalIncome;
 
             var change = totalIncome - totalExpenses;
-            PeriodChange = PeriodChange = change.ToString("+#;-#;0");
+            PeriodChange = change.ToString("+#;-#;0");
         }
     }
 }
