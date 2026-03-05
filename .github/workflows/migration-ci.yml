@@ -1,0 +1,59 @@
+name: migration-ci
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    paths:
+      - 'HomeCharts.sln'
+      - 'Directory.Build.props'
+      - 'Directory.Packages.props'
+      - 'src/**'
+      - 'tests/HomeCharts.Domain.Tests/**'
+      - 'tests/HomeCharts.Application.Tests/**'
+      - 'tests/HomeCharts.Infrastructure.Tests/**'
+      - 'build/**'
+      - 'docs/**'
+      - '.github/workflows/migration-ci.yml'
+  pull_request:
+    paths:
+      - 'HomeCharts.sln'
+      - 'Directory.Build.props'
+      - 'Directory.Packages.props'
+      - 'src/**'
+      - 'tests/HomeCharts.Domain.Tests/**'
+      - 'tests/HomeCharts.Application.Tests/**'
+      - 'tests/HomeCharts.Infrastructure.Tests/**'
+      - 'build/**'
+      - 'docs/**'
+      - '.github/workflows/migration-ci.yml'
+
+jobs:
+  build-test-publish:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
+      - name: Restore
+        run: dotnet restore HomeCharts.sln
+
+      - name: Build
+        run: dotnet build HomeCharts.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test HomeCharts.sln --configuration Release --no-build
+
+      - name: Publish app
+        run: dotnet publish src/HomeCharts.App/HomeCharts.App.csproj -c Release -r win-x64 --self-contained false -o artifacts/publish/win-x64
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: homecharts-migration-win-x64
+          path: artifacts/publish/win-x64
