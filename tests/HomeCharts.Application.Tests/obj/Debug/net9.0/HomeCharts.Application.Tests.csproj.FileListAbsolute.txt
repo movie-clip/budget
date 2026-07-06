@@ -174,3 +174,5 @@ C:\projects\NET\budget\tests\HomeCharts.Application.Tests\obj\Debug\net9.0\refin
 C:\projects\NET\budget\tests\HomeCharts.Application.Tests\obj\Debug\net9.0\HomeCharts.Application.Tests.pdb
 C:\projects\NET\budget\tests\HomeCharts.Application.Tests\obj\Debug\net9.0\HomeCharts.Application.Tests.genruntimeconfig.cache
 C:\projects\NET\budget\tests\HomeCharts.Application.Tests\obj\Debug\net9.0\ref\HomeCharts.Application.Tests.dll
+C:\projects\NET\budget\tests\HomeCharts.Application.Tests\bin\Debug\net9.0\HomeCharts.Presentation.dll
+C:\projects\NET\budget\tests\HomeCharts.Application.Tests\bin\Debug\net9.0\HomeCharts.Presentation.pdb

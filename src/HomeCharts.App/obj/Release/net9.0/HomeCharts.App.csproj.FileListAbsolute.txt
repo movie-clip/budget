@@ -105,3 +105,6 @@ C:\projects\NET\budget\src\HomeCharts.App\obj\Release\net9.0\refint\HomeCharts.A
 C:\projects\NET\budget\src\HomeCharts.App\obj\Release\net9.0\HomeCharts.App.pdb
 C:\projects\NET\budget\src\HomeCharts.App\obj\Release\net9.0\HomeCharts.App.genruntimeconfig.cache
 C:\projects\NET\budget\src\HomeCharts.App\obj\Release\net9.0\ref\HomeCharts.App.dll
+C:\projects\NET\budget\src\HomeCharts.App\bin\Release\net9.0\Avalonia.Controls.ColorPicker.dll
+C:\projects\NET\budget\src\HomeCharts.App\bin\Release\net9.0\Avalonia.Diagnostics.dll
+C:\projects\NET\budget\src\HomeCharts.App\bin\Release\net9.0\Avalonia.Themes.Simple.dll

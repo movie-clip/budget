@@ -153,6 +153,90 @@ public sealed class WorkflowIntegrationTests
         }
     }
 
+    [TestMethod]
+    public async Task SqliteBackedWorkflow_ImportOverlappingFiles_SkipsPreviouslyPersistedRowsAndTracksBatchCounts()
+    {
+        var dbPath = CreateTempDatabasePath();
+
+        try
+        {
+            var factory = new SqliteConnectionFactory(new SqliteOptions { DatabasePath = dbPath });
+            var migrationRunner = new SqliteMigrationRunner(factory);
+            await migrationRunner.EnsureCreatedAndMigratedAsync();
+
+            var transactionRepository = new SqliteTransactionRepository(factory);
+            var importBatchRepository = new SqliteImportBatchRepository(factory);
+
+            var duplicateCheck = new CheckImportDuplicateUseCase(importBatchRepository);
+            var parser = new BankStatementParser();
+            var importUseCase = new ImportBankStatementUseCase(transactionRepository, importBatchRepository, parser, duplicateCheck);
+
+            const string sharedRow = "30/06/2025|COMPRA TARJ. 5402XXXXXXXX7020 OPENAI *CHATGPT SUBSCR-SAN FRANCISCO|30/06/2025|-20.72|22482.40||5402__7020";
+            const string firstOnlyRow = "26/06/2025|TRANSFERENCIA RECIBIDA DE NOMINA MAY 2025 ADMN. Y SERV. DE PERSONAL- MADRID|26/06/2025|2666.89|23095.08||";
+            const string secondOnlyRow = "11/07/2025|PAGO BIZUM AMIGO CENA|11/07/2025|-18.50|21035.10||";
+
+            var first = await importUseCase.ExecuteAsync("June2025", string.Concat(sharedRow, "\n", firstOnlyRow));
+            Assert.AreEqual(2, first.ImportedCount);
+
+            var second = await importUseCase.ExecuteAsync("July2025", string.Concat(sharedRow, "\n", secondOnlyRow));
+
+            Assert.IsFalse(second.IsDuplicate);
+            Assert.AreEqual(1, second.ImportedCount);
+            Assert.AreEqual(1, second.SkippedDuplicateRowCount);
+            Assert.AreEqual(1, second.Metrics.DuplicateExistingRowCount);
+            Assert.IsTrue(second.Warnings.Any(static warning => warning.Code == BankStatementWarningCode.DuplicateRowInDatabase));
+
+            var transactions = await transactionRepository.GetByDateRangeAsync(new DateOnly(2025, 1, 1), new DateOnly(2025, 12, 31));
+            Assert.AreEqual(3, transactions.Count);
+
+            var secondBatch = await importBatchRepository.GetByFileHashAsync(second.FileHash);
+            Assert.IsNotNull(secondBatch);
+            Assert.AreEqual(1, secondBatch.ImportedCount);
+            Assert.AreEqual(1, secondBatch.SkippedCount);
+        }
+        finally
+        {
+            CleanupDatabaseFiles(dbPath);
+        }
+    }
+
+    [TestMethod]
+    public async Task SqliteBackedWorkflow_ImportDuplicateFileHash_SkipsSecondImportWithoutPersistingNewRows()
+    {
+        var dbPath = CreateTempDatabasePath();
+
+        try
+        {
+            var factory = new SqliteConnectionFactory(new SqliteOptions { DatabasePath = dbPath });
+            var migrationRunner = new SqliteMigrationRunner(factory);
+            await migrationRunner.EnsureCreatedAndMigratedAsync();
+
+            var transactionRepository = new SqliteTransactionRepository(factory);
+            var importBatchRepository = new SqliteImportBatchRepository(factory);
+
+            var duplicateCheck = new CheckImportDuplicateUseCase(importBatchRepository);
+            var parser = new BankStatementParser();
+            var importUseCase = new ImportBankStatementUseCase(transactionRepository, importBatchRepository, parser, duplicateCheck);
+
+            const string content = "20/06/2025|IMPUESTOS Y TASAS RECIBO REFERENCIA CATASTRAL 7160028VH5776S0015SE- MADRID|20/06/2025|-155.03|22862.37||";
+
+            var first = await importUseCase.ExecuteAsync("June2025", content);
+            var second = await importUseCase.ExecuteAsync("June2025-copy", content);
+
+            Assert.IsFalse(first.IsDuplicate);
+            Assert.IsTrue(second.IsDuplicate);
+            Assert.AreEqual(1, second.Errors.Count);
+            Assert.IsTrue(second.Warnings.Any(static warning => warning.Code == BankStatementWarningCode.DuplicateFileHash));
+
+            var transactions = await transactionRepository.GetByDateRangeAsync(new DateOnly(2025, 1, 1), new DateOnly(2025, 12, 31));
+            Assert.AreEqual(1, transactions.Count);
+        }
+        finally
+        {
+            CleanupDatabaseFiles(dbPath);
+        }
+    }
+
     private static string CreateTempDatabasePath()
     {
         var folder = Path.Combine(Path.GetTempPath(), "homecharts-migration-tests", Guid.NewGuid().ToString("N"));

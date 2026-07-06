@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HomeCharts.Application")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+11725b6385c548da293925a8018e20a4658ffa7a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a82291a780121794988d846214adabd9bb5e7972")]
 [assembly: System.Reflection.AssemblyProductAttribute("HomeCharts.Application")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HomeCharts.Application")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Windows.Input;
 using HomeCharts.Application.Import;
@@ -15,6 +16,7 @@ public sealed class MainWindowViewModel : ObservableObject
         "Cafe",
         "Shopping",
         "Grocery",
+        "Education",
         "Car",
         "Entertainment",
         "House",
@@ -22,6 +24,7 @@ public sealed class MainWindowViewModel : ObservableObject
         "Rent",
         "Utility",
         "Smoke",
+        "Travel",
         "Transport",
         "Services",
         "Income",
@@ -39,6 +42,7 @@ public sealed class MainWindowViewModel : ObservableObject
     private readonly DeleteAllRulesUseCase _deleteAllRulesUseCase;
     private readonly DeleteAllTransactionsUseCase _deleteAllTransactionsUseCase;
     private readonly CreateCategorizationRuleUseCase _createCategorizationRuleUseCase;
+    private readonly CreateCategorizationRulesBatchUseCase _createCategorizationRulesBatchUseCase;
     private readonly GetLedgerEntriesUseCase _getLedgerEntriesUseCase;
     private readonly BuildDashboardSnapshotUseCase _buildDashboardSnapshotUseCase;
     private readonly GetCategoriesUseCase _getCategoriesUseCase;
@@ -80,8 +84,16 @@ public sealed class MainWindowViewModel : ObservableObject
     private string _incomeText = "0.00";
     private string _expensesText = "0.00";
     private string _netText = "0.00";
+    private string _currentMonthLabelText = "This month";
+    private string _currentMonthIncomeText = "0.00";
+    private string _currentMonthExpensesText = "0.00";
+    private string _currentMonthNetText = "0.00";
+    private string _monthDeltaSummaryText = string.Empty;
     private string _savingsRateText = "0.00%";
     private string _uncategorizedCountText = "0";
+    private string _categorizedCoverageText = "0.00%";
+    private string _uncategorizedAmountText = "0.00";
+    private string _attentionSummaryText = "No dashboard actions pending";
     private double _incomeBarPercent;
     private double _expensesBarPercent;
     private string _selectedView = "Dashboard";
@@ -112,6 +124,7 @@ public sealed class MainWindowViewModel : ObservableObject
         DeleteAllRulesUseCase deleteAllRulesUseCase,
         DeleteAllTransactionsUseCase deleteAllTransactionsUseCase,
         CreateCategorizationRuleUseCase createCategorizationRuleUseCase,
+        CreateCategorizationRulesBatchUseCase createCategorizationRulesBatchUseCase,
         GetLedgerEntriesUseCase getLedgerEntriesUseCase,
         BuildDashboardSnapshotUseCase buildDashboardSnapshotUseCase,
         GetCategoriesUseCase getCategoriesUseCase,
@@ -135,6 +148,7 @@ public sealed class MainWindowViewModel : ObservableObject
         _deleteAllRulesUseCase = deleteAllRulesUseCase;
         _deleteAllTransactionsUseCase = deleteAllTransactionsUseCase;
         _createCategorizationRuleUseCase = createCategorizationRuleUseCase;
+        _createCategorizationRulesBatchUseCase = createCategorizationRulesBatchUseCase;
         _getLedgerEntriesUseCase = getLedgerEntriesUseCase;
         _buildDashboardSnapshotUseCase = buildDashboardSnapshotUseCase;
         _getCategoriesUseCase = getCategoriesUseCase;
@@ -147,7 +161,6 @@ public sealed class MainWindowViewModel : ObservableObject
         _exportDataPackageUseCase = exportDataPackageUseCase;
         _importDataPackageUseCase = importDataPackageUseCase;
 
-        InitializeCommand = new DelegateCommand(() => _ = InitializeAsync(), () => !IsBusy);
         ImportCommand = new DelegateCommand(() => _ = ImportAsync(), () => !IsBusy);
         ApplyRulesCommand = new DelegateCommand(() => _ = ApplyRulesAsync(), () => !IsBusy);
         RefreshCommand = new DelegateCommand(() => _ = RefreshAsync(), () => !IsBusy);
@@ -165,6 +178,9 @@ public sealed class MainWindowViewModel : ObservableObject
         SavePotentialRuleCommand = new DelegateCommand<EditableRulesImportedTransactionViewModel>(
             row => _ = SavePotentialRuleAsync(row),
             row => !IsBusy && row is not null);
+        SaveAllPotentialRulesCommand = new DelegateCommand(
+            () => _ = SaveAllPotentialRulesAsync(),
+            () => !IsBusy && ImportedRuleTransactions.Any(static row => row.IsModified && row.SelectedCategory is not null));
         AddPrefixFilterCommand = new DelegateCommand(() => _ = AddPrefixFilterAsync(), () => !IsBusy && !string.IsNullOrWhiteSpace(NewPrefixFilter));
         RemovePrefixFilterCommand = new DelegateCommand<PrefixFilterItemViewModel>(
             item => _ = RemovePrefixFilterAsync(item),
@@ -190,6 +206,8 @@ public sealed class MainWindowViewModel : ObservableObject
     public ObservableCollection<DashboardCategoryRowViewModel> CategoryRows { get; } = [];
     public ObservableCollection<DashboardExpenseCategoryBarViewModel> ExpenseCategoryBars { get; } = [];
     public ObservableCollection<DashboardUncategorizedRowViewModel> UncategorizedRows { get; } = [];
+    public ObservableCollection<DashboardLargestExpenseViewModel> LargestExpenseRows { get; } = [];
+    public ObservableCollection<DashboardRecurringExpenseViewModel> RecurringExpenseRows { get; } = [];
     public ObservableCollection<EditableRulesImportedTransactionViewModel> ImportedRuleTransactions { get; } = [];
     public ObservableCollection<MatchedImportedTransactionViewModel> MatchedImportTransactions { get; } = [];
     public ObservableCollection<ParsedCategoryExpenseViewModel> ParsedCategoryExpenses { get; } = [];
@@ -206,7 +224,6 @@ public sealed class MainWindowViewModel : ObservableObject
         new DatePresetOptionViewModel(LedgerDatePreset.Custom, "Custom")
     ];
 
-    public ICommand InitializeCommand { get; }
     public ICommand ImportCommand { get; }
     public ICommand ApplyRulesCommand { get; }
     public ICommand RefreshCommand { get; }
@@ -222,6 +239,7 @@ public sealed class MainWindowViewModel : ObservableObject
     public ICommand ClearAllTransactionsCommand { get; }
     public ICommand MergeMatchedTransactionsCommand { get; }
     public ICommand SavePotentialRuleCommand { get; }
+    public ICommand SaveAllPotentialRulesCommand { get; }
     public ICommand AddPrefixFilterCommand { get; }
     public ICommand RemovePrefixFilterCommand { get; }
     public ICommand ResetTransactionFiltersCommand { get; }
@@ -439,10 +457,58 @@ public sealed class MainWindowViewModel : ObservableObject
         private set => SetProperty(ref _savingsRateText, value);
     }
 
+    public string CurrentMonthLabelText
+    {
+        get => _currentMonthLabelText;
+        private set => SetProperty(ref _currentMonthLabelText, value);
+    }
+
+    public string CurrentMonthIncomeText
+    {
+        get => _currentMonthIncomeText;
+        private set => SetProperty(ref _currentMonthIncomeText, value);
+    }
+
+    public string CurrentMonthExpensesText
+    {
+        get => _currentMonthExpensesText;
+        private set => SetProperty(ref _currentMonthExpensesText, value);
+    }
+
+    public string CurrentMonthNetText
+    {
+        get => _currentMonthNetText;
+        private set => SetProperty(ref _currentMonthNetText, value);
+    }
+
+    public string MonthDeltaSummaryText
+    {
+        get => _monthDeltaSummaryText;
+        private set => SetProperty(ref _monthDeltaSummaryText, value);
+    }
+
     public string UncategorizedCountText
     {
         get => _uncategorizedCountText;
         private set => SetProperty(ref _uncategorizedCountText, value);
+    }
+
+    public string CategorizedCoverageText
+    {
+        get => _categorizedCoverageText;
+        private set => SetProperty(ref _categorizedCoverageText, value);
+    }
+
+    public string UncategorizedAmountText
+    {
+        get => _uncategorizedAmountText;
+        private set => SetProperty(ref _uncategorizedAmountText, value);
+    }
+
+    public string AttentionSummaryText
+    {
+        get => _attentionSummaryText;
+        private set => SetProperty(ref _attentionSummaryText, value);
     }
 
     public double IncomeBarPercent
@@ -516,23 +582,6 @@ public sealed class MainWindowViewModel : ObservableObject
 
             RaiseCommands();
         }
-    }
-
-    public async Task InitializeAsync()
-    {
-        await RunBusyAsync(async () =>
-        {
-            await _initializeDatabaseUseCase.ExecuteAsync();
-            await _seedDefaultCategoriesUseCase.ExecuteAsync();
-            await EnsureDefaultPrefixFiltersAsync();
-            await ReloadCategoriesAsync();
-            await ReloadPrefixFiltersAsync();
-            await RefreshLedgerAsync();
-            await RefreshDashboardAsync();
-            await RefreshRulesQueueAsync();
-            await RefreshParsedCategoryExpensesAsync();
-            Status = "Initialized DB.";
-        });
     }
 
     public async Task ImportFromSelectedFileAsync(string filePath)
@@ -844,6 +893,28 @@ public sealed class MainWindowViewModel : ObservableObject
         });
     }
 
+    private async Task SaveAllPotentialRulesAsync()
+    {
+        await RunBusyAsync(async () =>
+        {
+            var modifiedRows = ImportedRuleTransactions
+                .Where(static row => row.IsModified && row.SelectedCategory is not null)
+                .Select(static row => new CreateCategorizationRulesBatchItem(row.Description, row.SelectedCategory!.Id))
+                .ToArray();
+
+            if (modifiedRows.Length == 0)
+            {
+                Status = "Modify at least one row before applying all rules.";
+                return;
+            }
+
+            var result = await _createCategorizationRulesBatchUseCase.ExecuteAsync(modifiedRows);
+            await RefreshRulesQueueAsync();
+            await RefreshParsedCategoryExpensesAsync();
+            Status = $"Apply all complete. Created: {result.CreatedCount}, duplicates: {result.DuplicateCount}, invalid: {result.InvalidCount}.";
+        });
+    }
+
     private async Task AddPrefixFilterAsync()
     {
         await RunBusyAsync(async () =>
@@ -1094,7 +1165,7 @@ public sealed class MainWindowViewModel : ObservableObject
         var snapshot = await _buildDashboardSnapshotUseCase.ExecuteAsync(range.From, range.To, trendMonths: 12, uncategorizedLimit: 12);
 
         DashboardSummary =
-            $"Tx: {snapshot.Kpi.TotalTransactions} • Income: {snapshot.Kpi.TotalIncome:0.00} • Expenses: {snapshot.Kpi.TotalExpenses:0.00} • Net: {snapshot.Kpi.NetAmount:0.00} • Savings: {snapshot.Kpi.SavingsRatePercent:0.00}% • Uncategorized: {snapshot.Kpi.UncategorizedCount}";
+            $"Tx: {snapshot.Kpi.TotalTransactions} • Income: {snapshot.Kpi.TotalIncome:0.00} • Expenses: {snapshot.Kpi.TotalExpenses:0.00} • Net: {snapshot.Kpi.NetAmount:0.00} • Savings: {snapshot.Kpi.SavingsRatePercent:0.00}% • Categorized: {snapshot.Coverage.CategorizedPercent:0.00}% • Uncategorized: {snapshot.Kpi.UncategorizedCount}";
 
         TotalTransactionsText = snapshot.Kpi.TotalTransactions.ToString();
         IncomeText = snapshot.Kpi.TotalIncome.ToString("0.00");
@@ -1102,6 +1173,14 @@ public sealed class MainWindowViewModel : ObservableObject
         NetText = snapshot.Kpi.NetAmount.ToString("0.00");
         SavingsRateText = snapshot.Kpi.SavingsRatePercent.ToString("0.00") + "%";
         UncategorizedCountText = snapshot.Kpi.UncategorizedCount.ToString();
+        CategorizedCoverageText = snapshot.Coverage.CategorizedPercent.ToString("0.00") + "%";
+        UncategorizedAmountText = snapshot.Coverage.UncategorizedAmount.ToString("0.00");
+        CurrentMonthLabelText = snapshot.CurrentVsPreviousMonth.Current.Month.ToString("MMMM yyyy", CultureInfo.InvariantCulture);
+        CurrentMonthIncomeText = snapshot.CurrentVsPreviousMonth.Current.Income.ToString("0.00");
+        CurrentMonthExpensesText = snapshot.CurrentVsPreviousMonth.Current.Expenses.ToString("0.00");
+        CurrentMonthNetText = snapshot.CurrentVsPreviousMonth.Current.Net.ToString("0.00");
+        MonthDeltaSummaryText = string.Empty;
+        AttentionSummaryText = string.Empty;
 
         var totalFlow = Math.Abs(snapshot.Kpi.TotalIncome) + Math.Abs(snapshot.Kpi.TotalExpenses);
         if (totalFlow <= 0)
@@ -1190,6 +1269,30 @@ public sealed class MainWindowViewModel : ObservableObject
                 percent,
                 transactionItems,
                 OnExpenseCategoryExpanded));
+        }
+
+        LargestExpenseRows.Clear();
+        foreach (var item in snapshot.LargestExpenses)
+        {
+            LargestExpenseRows.Add(new DashboardLargestExpenseViewModel(
+                item.TransactionId,
+                item.BookingDate.ToString("yyyy-MM-dd"),
+                FormatDescriptionForDisplay(item.Description),
+                item.CategoryName,
+                item.Amount));
+        }
+
+        RecurringExpenseRows.Clear();
+        foreach (var item in snapshot.RecurringExpenses)
+        {
+            RecurringExpenseRows.Add(new DashboardRecurringExpenseViewModel(
+                FormatDescriptionForDisplay(item.Description),
+                item.CategoryName,
+                item.AverageAmount,
+                item.LastAmount,
+                item.OccurrenceCount,
+                item.DistinctMonthCount,
+                item.LastSeenDate.ToString("yyyy-MM-dd")));
         }
 
         UncategorizedRows.Clear();
@@ -1302,12 +1405,15 @@ public sealed class MainWindowViewModel : ObservableObject
 
         foreach (var row in pageRows)
         {
-            ImportedRuleTransactions.Add(new EditableRulesImportedTransactionViewModel(
+            var viewModel = new EditableRulesImportedTransactionViewModel(
                 Guid.NewGuid(),
                 row.BookingDate,
                 FormatDescriptionForDisplay(row.Description),
                 row.Amount,
-                GetDefaultPotentialRuleCategory()));
+                GetDefaultPotentialRuleCategory());
+
+            viewModel.PropertyChanged += OnImportedRuleTransactionChanged;
+            ImportedRuleTransactions.Add(viewModel);
         }
 
         RulesQueuePageInfo = $"Page {_rulesQueueCurrentPage}/{totalPages}";
@@ -1499,7 +1605,6 @@ public sealed class MainWindowViewModel : ObservableObject
 
     private void RaiseCommands()
     {
-        (InitializeCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (ImportCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (ApplyRulesCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (RefreshCommand as DelegateCommand)?.RaiseCanExecuteChanged();
@@ -1515,6 +1620,7 @@ public sealed class MainWindowViewModel : ObservableObject
         (ClearAllTransactionsCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (MergeMatchedTransactionsCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (SavePotentialRuleCommand as DelegateCommand<EditableRulesImportedTransactionViewModel>)?.RaiseCanExecuteChanged();
+        (SaveAllPotentialRulesCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (AddPrefixFilterCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (RemovePrefixFilterCommand as DelegateCommand<PrefixFilterItemViewModel>)?.RaiseCanExecuteChanged();
         (ResetTransactionFiltersCommand as DelegateCommand)?.RaiseCanExecuteChanged();
@@ -1560,5 +1666,31 @@ public sealed class MainWindowViewModel : ObservableObject
         OnPropertyChanged(nameof(IsImportFiltersViewSelected));
         OnPropertyChanged(nameof(IsLedgerViewSelected));
         OnPropertyChanged(nameof(IsUtilityViewSelected));
+    }
+
+    private void OnImportedRuleTransactionChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName is nameof(EditableRulesImportedTransactionViewModel.Description)
+            or nameof(EditableRulesImportedTransactionViewModel.SelectedCategory))
+        {
+            RaiseCommands();
+        }
+    }
+
+    public async Task LoadInitialStateAsync()
+    {
+        await RunBusyAsync(async () =>
+        {
+            await _initializeDatabaseUseCase.ExecuteAsync();
+            await _seedDefaultCategoriesUseCase.ExecuteAsync();
+            await EnsureDefaultPrefixFiltersAsync();
+            await ReloadCategoriesAsync();
+            await ReloadPrefixFiltersAsync();
+            await RefreshLedgerAsync();
+            await RefreshDashboardAsync();
+            await RefreshRulesQueueAsync();
+            await RefreshParsedCategoryExpensesAsync();
+            Status = "Ready";
+        });
     }
 }

@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\HomeCharts.Application\HomeCharts.Application.csproj" />
+    <ProjectReference Include="..\..\src\HomeCharts.Presentation\HomeCharts.Presentation.csproj" />
   </ItemGroup>
 
 </Project>

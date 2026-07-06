@@ -53,6 +53,8 @@ public sealed class EditableRulesImportedTransactionViewModel : ObservableObject
 {
     private string _description;
     private CategoryOptionViewModel? _selectedCategory;
+    private readonly string _originalDescription;
+    private readonly Guid? _originalCategoryId;
 
     public EditableRulesImportedTransactionViewModel(
         Guid id,
@@ -63,8 +65,10 @@ public sealed class EditableRulesImportedTransactionViewModel : ObservableObject
     {
         Id = id;
         BookingDate = bookingDate;
+        _originalDescription = description;
         _description = description;
         Amount = amount;
+        _originalCategoryId = selectedCategory?.Id;
         _selectedCategory = selectedCategory;
     }
 
@@ -86,6 +90,10 @@ public sealed class EditableRulesImportedTransactionViewModel : ObservableObject
 
     public string BookingDateText => BookingDate.ToString("yyyy-MM-dd");
     public string AmountText => Amount.ToString("0.00");
+
+    public bool IsModified =>
+        !string.Equals(_originalDescription, Description, StringComparison.Ordinal)
+        || _originalCategoryId != SelectedCategory?.Id;
 }
 
 public sealed record ParsedCategoryExpenseViewModel(string Category, decimal ExpenseAmount, int Transactions)

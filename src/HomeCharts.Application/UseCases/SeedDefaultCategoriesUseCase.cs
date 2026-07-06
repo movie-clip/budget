@@ -11,6 +11,7 @@ public sealed class SeedDefaultCategoriesUseCase(ICategoryRepository categoryRep
         ("Shopping", "#EAB308"),
         ("Car", "#06B6D4"),
         ("Entertainment", "#8B5CF6"),
+        ("Education", "#0EA5E9"),
         ("Grocery", "#22C55E"),
         ("House", "#0EA5E9"),
         ("Medicine", "#EC4899"),
@@ -20,6 +21,7 @@ public sealed class SeedDefaultCategoriesUseCase(ICategoryRepository categoryRep
         ("Others", "#64748B"),
         ("Rent", "#14B8A6"),
         ("Smoke", "#A855F7"),
+        ("Travel", "#14B8A6"),
         ("Transport", "#F59E0B"),
         ("Services", "#3B82F6"),
         ("Utility", "#6366F1")

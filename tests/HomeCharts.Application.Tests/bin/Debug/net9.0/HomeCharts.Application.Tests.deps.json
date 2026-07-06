@@ -9,6 +9,7 @@
       "HomeCharts.Application.Tests/1.0.0": {
         "dependencies": {
           "HomeCharts.Application": "1.0.0",
+          "HomeCharts.Presentation": "1.0.0",
           "MSTest": "3.6.4",
           "Microsoft.NET.Test.Sdk": "17.12.0",
           "Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions": "14.0.0.0"
@@ -614,6 +615,18 @@
           }
         }
       },
+      "HomeCharts.Presentation/1.0.0": {
+        "dependencies": {
+          "HomeCharts.Application": "1.0.0",
+          "HomeCharts.Contracts": "1.0.0"
+        },
+        "runtime": {
+          "HomeCharts.Presentation.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
       "Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions/14.0.0.0": {
         "runtime": {
           "Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll": {
@@ -760,6 +773,11 @@
       "sha512": ""
     },
     "HomeCharts.Domain/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "HomeCharts.Presentation/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

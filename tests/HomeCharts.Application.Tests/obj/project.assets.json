@@ -721,6 +721,20 @@
         "runtime": {
           "bin/placeholder/HomeCharts.Domain.dll": {}
         }
+      },
+      "HomeCharts.Presentation/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "dependencies": {
+          "HomeCharts.Application": "1.0.0",
+          "HomeCharts.Contracts": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/HomeCharts.Presentation.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/HomeCharts.Presentation.dll": {}
+        }
       }
     }
   },
@@ -1695,11 +1709,17 @@
       "type": "project",
       "path": "../../src/HomeCharts.Domain/HomeCharts.Domain.csproj",
       "msbuildProject": "../../src/HomeCharts.Domain/HomeCharts.Domain.csproj"
+    },
+    "HomeCharts.Presentation/1.0.0": {
+      "type": "project",
+      "path": "../../src/HomeCharts.Presentation/HomeCharts.Presentation.csproj",
+      "msbuildProject": "../../src/HomeCharts.Presentation/HomeCharts.Presentation.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net9.0": [
       "HomeCharts.Application >= 1.0.0",
+      "HomeCharts.Presentation >= 1.0.0",
       "MSTest >= 3.6.4",
       "Microsoft.NET.Test.Sdk >= 17.12.0"
     ]
@@ -1738,6 +1758,9 @@
           "projectReferences": {
             "C:\\projects\\NET\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj": {
               "projectPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj"
+            },
+            "C:\\projects\\NET\\budget\\src\\HomeCharts.Presentation\\HomeCharts.Presentation.csproj": {
+              "projectPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Presentation\\HomeCharts.Presentation.csproj"
             }
           }
         }

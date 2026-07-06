@@ -6,5 +6,35 @@
 
     <Application.Styles>
         <FluentTheme />
+        <Style Selector="TextBlock.finance-income">
+            <Setter Property="Foreground" Value="#22C55E"/>
+        </Style>
+        <Style Selector="TextBlock.finance-expense">
+            <Setter Property="Foreground" Value="#EF4444"/>
+        </Style>
+        <Style Selector="TextBlock.finance-accent">
+            <Setter Property="Foreground" Value="#3B82F6"/>
+        </Style>
+        <Style Selector="TextBlock.finance-warning">
+            <Setter Property="Foreground" Value="#F59E0B"/>
+        </Style>
+        <Style Selector="Button.finance-primary">
+            <Setter Property="Background" Value="#3B82F6"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Button.finance-danger">
+            <Setter Property="Background" Value="#7F1D1D"/>
+            <Setter Property="BorderBrush" Value="#B91C1C"/>
+            <Setter Property="Foreground" Value="White"/>
+        </Style>
+        <Style Selector="Border.finance-income-swatch">
+            <Setter Property="Background" Value="#22C55E"/>
+        </Style>
+        <Style Selector="Border.finance-expense-swatch">
+            <Setter Property="Background" Value="#EF4444"/>
+        </Style>
+        <Style Selector="Border.finance-accent-swatch">
+            <Setter Property="Background" Value="#3B82F6"/>
+        </Style>
     </Application.Styles>
 </Application>

@@ -54,6 +54,7 @@ internal sealed class CompositionRoot
         var deleteAllRulesUseCase = new DeleteAllRulesUseCase(ruleRepository);
         var deleteAllTransactionsUseCase = new DeleteAllTransactionsUseCase(manualOverrideRepository, transactionRepository, importBatchRepository);
         var createCategorizationRuleUseCase = new CreateCategorizationRuleUseCase(ruleRepository);
+        var createCategorizationRulesBatchUseCase = new CreateCategorizationRulesBatchUseCase(createCategorizationRuleUseCase);
         var getLedgerEntriesUseCase = new GetLedgerEntriesUseCase(transactionRepository, categoryRepository);
         var buildDashboardSnapshotUseCase = new BuildDashboardSnapshotUseCase(transactionRepository, categoryRepository);
         var getCategoriesUseCase = new GetCategoriesUseCase(categoryRepository);
@@ -78,6 +79,7 @@ internal sealed class CompositionRoot
             deleteAllRulesUseCase,
             deleteAllTransactionsUseCase,
             createCategorizationRuleUseCase,
+            createCategorizationRulesBatchUseCase,
             getLedgerEntriesUseCase,
             buildDashboardSnapshotUseCase,
             getCategoriesUseCase,

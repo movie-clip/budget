@@ -28,7 +28,7 @@ public partial class MainWindow : Window
     private async void OnOpened(object? sender, EventArgs e)
     {
         Opened -= OnOpened;
-        await _viewModel.InitializeAsync();
+        await _viewModel.LoadInitialStateAsync();
     }
 
     private void OnKeyDown(object? sender, KeyEventArgs e)

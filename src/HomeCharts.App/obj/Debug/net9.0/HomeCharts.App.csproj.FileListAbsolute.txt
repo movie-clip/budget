@@ -1,4 +1,3 @@
-C:\projects\NET\budget\src\HomeCharts.App\bin\Debug\net9.0\HomeCharts.App.exe
 C:\projects\NET\budget\src\HomeCharts.App\bin\Debug\net9.0\HomeCharts.App.deps.json
 C:\projects\NET\budget\src\HomeCharts.App\bin\Debug\net9.0\HomeCharts.App.runtimeconfig.json
 C:\projects\NET\budget\src\HomeCharts.App\bin\Debug\net9.0\HomeCharts.App.dll

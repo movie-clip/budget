@@ -1,7 +1,9 @@
-﻿using HomeCharts.Application.UseCases;
+using HomeCharts.Application.UseCases;
 using HomeCharts.Application.Import;
 using HomeCharts.Contracts.Persistence;
+using HomeCharts.Domain.Categorization;
 using HomeCharts.Domain.Model;
+using HomeCharts.Presentation.Mvp;
 
 namespace HomeCharts.Application.Tests;
 
@@ -29,8 +31,72 @@ public sealed class ApplicationUseCaseTests
 
         Assert.IsTrue(repository.Items.Count >= 10);
         Assert.IsTrue(repository.Items.All(static item => item.IsSystem));
+        CollectionAssert.Contains(repository.Items.Select(static item => item.Name).ToList(), "Education");
         CollectionAssert.Contains(repository.Items.Select(static item => item.Name).ToList(), "Grocery");
+        CollectionAssert.Contains(repository.Items.Select(static item => item.Name).ToList(), "Travel");
         CollectionAssert.Contains(repository.Items.Select(static item => item.Name).ToList(), "Utility");
+    }
+
+    [TestMethod]
+    public async Task CreateCategorizationRulesBatchUseCase_CreatesAndCountsCreatedDuplicateAndInvalidItems()
+    {
+        var groceriesId = Guid.NewGuid();
+        var servicesId = Guid.NewGuid();
+        var repository = new FakeRuleRepository
+        {
+            Rules =
+            [
+                new CategorizationRule
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Contains OPENAI",
+                    Pattern = "OPENAI",
+                    MatchType = RuleMatchType.Contains,
+                    Priority = 5,
+                    CategoryId = servicesId,
+                    IsActive = true
+                }
+            ]
+        };
+
+        var single = new CreateCategorizationRuleUseCase(repository);
+        var batch = new CreateCategorizationRulesBatchUseCase(single);
+
+        var result = await batch.ExecuteAsync(
+        [
+            new CreateCategorizationRulesBatchItem("MERCADONA", groceriesId),
+            new CreateCategorizationRulesBatchItem("OPENAI", servicesId),
+            new CreateCategorizationRulesBatchItem("   ", groceriesId)
+        ]);
+
+        Assert.AreEqual(1, result.CreatedCount);
+        Assert.AreEqual(1, result.DuplicateCount);
+        Assert.AreEqual(1, result.InvalidCount);
+        Assert.IsTrue(repository.Rules.Any(rule => rule.Pattern == "MERCADONA" && rule.CategoryId == groceriesId));
+    }
+
+    [TestMethod]
+    public void EditableRulesImportedTransactionViewModel_TracksModifiedStateFromDescriptionAndCategory()
+    {
+        var none = new CategoryOptionViewModel(Guid.NewGuid(), "None", "#94A3B8");
+        var education = new CategoryOptionViewModel(Guid.NewGuid(), "Education", "#0EA5E9");
+        var row = new EditableRulesImportedTransactionViewModel(
+            Guid.NewGuid(),
+            new DateOnly(2026, 3, 18),
+            "OPENAI *CHATGPT SUBSCR",
+            -20.72m,
+            none);
+
+        Assert.IsFalse(row.IsModified);
+
+        row.Description = "OPENAI";
+        Assert.IsTrue(row.IsModified);
+
+        row.Description = "OPENAI *CHATGPT SUBSCR";
+        Assert.IsFalse(row.IsModified);
+
+        row.SelectedCategory = education;
+        Assert.IsTrue(row.IsModified);
     }
 
     [TestMethod]
@@ -495,6 +561,10 @@ public sealed class ApplicationUseCaseTests
     [TestMethod]
     public async Task BuildDashboardSnapshotUseCase_ComputesKpiTrendBreakdownAndUncategorized()
     {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var currentMonthStart = new DateOnly(today.Year, today.Month, 1);
+        var previousMonthStart = currentMonthStart.AddMonths(-1);
+        var twoMonthsAgoStart = currentMonthStart.AddMonths(-2);
         var groceriesId = Guid.NewGuid();
         var categoryRepository = new FakeCategoryRepository();
         await categoryRepository.UpsertAsync(new Category
@@ -512,43 +582,76 @@ public sealed class ApplicationUseCaseTests
                 new Transaction
                 {
                     Id = Guid.NewGuid(),
-                    BookingDate = new DateOnly(2026, 1, 15),
-                    Description = "Salary January",
+                    BookingDate = currentMonthStart.AddDays(2),
+                    Description = "Salary Current",
                     Amount = 3000m,
-                    CategoryId = null
+                    CategoryId = null,
+                    NormalizedDescription = "SALARY CURRENT"
                 },
                 new Transaction
                 {
                     Id = Guid.NewGuid(),
-                    BookingDate = new DateOnly(2026, 1, 20),
+                    BookingDate = currentMonthStart.AddDays(5),
                     Description = "Supermarket",
                     Amount = -120m,
-                    CategoryId = groceriesId
+                    CategoryId = groceriesId,
+                    NormalizedDescription = "SUPERMARKET"
                 },
                 new Transaction
                 {
                     Id = Guid.NewGuid(),
-                    BookingDate = new DateOnly(2026, 2, 4),
+                    BookingDate = previousMonthStart.AddDays(4),
                     Description = "Unknown charge",
                     Amount = -50m,
-                    CategoryId = null
+                    CategoryId = null,
+                    NormalizedDescription = "UNKNOWN CHARGE"
+                },
+                new Transaction
+                {
+                    Id = Guid.NewGuid(),
+                    BookingDate = previousMonthStart.AddDays(8),
+                    Description = "Streaming Subscription",
+                    Amount = -25m,
+                    CategoryId = null,
+                    NormalizedDescription = "STREAMING SUBSCRIPTION"
+                },
+                new Transaction
+                {
+                    Id = Guid.NewGuid(),
+                    BookingDate = twoMonthsAgoStart.AddDays(8),
+                    Description = "Streaming Subscription",
+                    Amount = -24m,
+                    CategoryId = null,
+                    NormalizedDescription = "STREAMING SUBSCRIPTION"
                 }
             ]
         };
 
         var useCase = new BuildDashboardSnapshotUseCase(transactionRepository, categoryRepository);
-        var snapshot = await useCase.ExecuteAsync(new DateOnly(2026, 1, 1), new DateOnly(2026, 12, 31), trendMonths: 3, uncategorizedLimit: 10);
+        var snapshot = await useCase.ExecuteAsync(twoMonthsAgoStart, currentMonthStart.AddMonths(1), trendMonths: 3, uncategorizedLimit: 10);
 
-        Assert.AreEqual(3, snapshot.Kpi.TotalTransactions);
+        Assert.AreEqual(5, snapshot.Kpi.TotalTransactions);
         Assert.AreEqual(3000m, snapshot.Kpi.TotalIncome);
-        Assert.AreEqual(170m, snapshot.Kpi.TotalExpenses);
-        Assert.AreEqual(2830m, snapshot.Kpi.NetAmount);
-        Assert.AreEqual(2, snapshot.Kpi.UncategorizedCount);
+        Assert.AreEqual(219m, snapshot.Kpi.TotalExpenses);
+        Assert.AreEqual(2781m, snapshot.Kpi.NetAmount);
+        Assert.AreEqual(4, snapshot.Kpi.UncategorizedCount);
+        Assert.AreEqual(99m, snapshot.Kpi.UncategorizedAmount);
+        Assert.AreEqual(96m, snapshot.Kpi.SavingsRatePercent);
 
         Assert.AreEqual(3, snapshot.MonthlyTrend.Count);
         Assert.IsTrue(snapshot.MonthlyTrend.Any(point => point.Income > 0));
         Assert.IsTrue(snapshot.CategoryBreakdown.Any(item => item.CategoryName == "Groceries"));
-        Assert.AreEqual(2, snapshot.UncategorizedQueue.Count);
+        Assert.AreEqual(4, snapshot.UncategorizedQueue.Count);
+        Assert.AreEqual(currentMonthStart, snapshot.CurrentVsPreviousMonth.Current.Month);
+        Assert.AreEqual(3000m, snapshot.CurrentVsPreviousMonth.Current.Income);
+        Assert.AreEqual(120m, snapshot.CurrentVsPreviousMonth.Current.Expenses);
+        Assert.AreEqual(2880m, snapshot.CurrentVsPreviousMonth.Current.Net);
+        Assert.AreEqual(previousMonthStart, snapshot.CurrentVsPreviousMonth.Previous.Month);
+        Assert.AreEqual(75m, snapshot.CurrentVsPreviousMonth.Previous.Expenses);
+        Assert.AreEqual(1, snapshot.Coverage.CategorizedCount);
+        Assert.AreEqual(4, snapshot.Coverage.UncategorizedCount);
+        Assert.AreEqual("Supermarket", snapshot.LargestExpenses[0].Description);
+        Assert.AreEqual("Streaming Subscription", snapshot.RecurringExpenses[0].Description);
     }
 
     [TestMethod]
@@ -775,6 +878,150 @@ public sealed class ApplicationUseCaseTests
     }
 
     [TestMethod]
+    public async Task CheckImportDuplicateUseCase_NormalizesLineEndingsBeforeHashing()
+    {
+        const string unixContent = "30/06/2025|COMPRA TARJ. OPENAI|30/06/2025|-20.72|22482.40||5402__7020\n26/06/2025|TRANSFERENCIA NOMINA|26/06/2025|2666.89|23095.08||";
+
+        var importBatchRepository = new FakeImportBatchRepository();
+        var useCase = new CheckImportDuplicateUseCase(importBatchRepository);
+
+        var first = await useCase.ExecuteAsync(" June2025 ", unixContent);
+        await importBatchRepository.UpsertAsync(new ImportBatch
+        {
+            Id = Guid.NewGuid(),
+            SourceName = first.SourceName,
+            FileHash = first.FileHash,
+            ImportedAtUtc = DateTimeOffset.UtcNow,
+            ImportedCount = 2,
+            SkippedCount = 0
+        });
+
+        var second = await useCase.ExecuteAsync("June2025", unixContent.Replace("\n", "\r\n", StringComparison.Ordinal));
+
+        Assert.AreEqual("June2025", first.SourceName);
+        Assert.AreEqual(first.FileHash, second.FileHash);
+        Assert.IsTrue(second.IsDuplicate);
+        Assert.IsTrue(second.ExistingBatchId.HasValue);
+    }
+
+    [TestMethod]
+    public async Task ImportBankStatementUseCase_TracksMixedDuplicateAndExistingRowsInOneImport()
+    {
+        const string sharedRow = "30/06/2025|COMPRA TARJ. 5402XXXXXXXX7020 OPENAI *CHATGPT SUBSCR-SAN FRANCISCO|30/06/2025|-20.72|22482.40||5402__7020";
+        const string newExpenseRow = "11/07/2025|PAGO BIZUM AMIGO CENA|11/07/2025|-18.50|21035.10||";
+        const string newIncomeRow = "26/06/2025|TRANSFERENCIA RECIBIDA DE NOMINA MAY 2025 ADMN. Y SERV. DE PERSONAL- MADRID|26/06/2025|2666.89|23095.08||";
+
+        var importBatchRepository = new FakeImportBatchRepository();
+        var transactionRepository = new FakeTransactionRepository
+        {
+            Items = [CreatePersistedTransactionFromRow(sharedRow)]
+        };
+        var duplicateCheck = new CheckImportDuplicateUseCase(importBatchRepository);
+        var useCase = new ImportBankStatementUseCase(transactionRepository, importBatchRepository, new BankStatementParser(), duplicateCheck);
+
+        var content = string.Concat(sharedRow, "\n", newExpenseRow, "\n", newExpenseRow, "\n", newIncomeRow);
+        var result = await useCase.ExecuteAsync("July2025", content);
+
+        Assert.IsFalse(result.IsDuplicate);
+        Assert.AreEqual(2, result.ImportedCount);
+        Assert.AreEqual(2, result.SkippedDuplicateRowCount);
+        Assert.AreEqual(4, result.Metrics.ParsedRowCount);
+        Assert.AreEqual(1, result.Metrics.DuplicateRowCount);
+        Assert.AreEqual(1, result.Metrics.DuplicateExistingRowCount);
+        Assert.AreEqual(2, result.Metrics.ImportedRowCount);
+        Assert.AreEqual(2, result.Warnings.Count);
+        Assert.IsTrue(result.Warnings.Any(static warning => warning.Code == BankStatementWarningCode.DuplicateRowInFile));
+        Assert.IsTrue(result.Warnings.Any(static warning => warning.Code == BankStatementWarningCode.DuplicateRowInDatabase));
+        Assert.AreEqual(3, transactionRepository.Items.Count);
+
+        var batch = importBatchRepository.StoredBatches.Single();
+        Assert.AreEqual(2, batch.ImportedCount);
+        Assert.AreEqual(2, batch.SkippedCount);
+    }
+
+    [TestMethod]
+    public async Task MergeMatchedTransactionsUseCase_WhenNoRulesMatch_PersistsNothingAndTracksUnmatchedRows()
+    {
+        const string content = "30/06/2025|COMPRA TARJ. OPENAI|30/06/2025|-20.72|22482.40||5402__7020\n26/06/2025|TRANSFERENCIA NOMINA|26/06/2025|2666.89|23095.08||";
+
+        var importBatchRepository = new FakeImportBatchRepository();
+        var transactionRepository = new FakeTransactionRepository();
+        var ruleRepository = new FakeRuleRepository { Rules = [] };
+        var duplicateCheck = new CheckImportDuplicateUseCase(importBatchRepository);
+        var useCase = new MergeMatchedTransactionsUseCase(
+            transactionRepository,
+            importBatchRepository,
+            ruleRepository,
+            new BankStatementParser(),
+            duplicateCheck);
+
+        var result = await useCase.ExecuteAsync("NoMatches", content);
+
+        Assert.IsFalse(result.IsDuplicate);
+        Assert.AreEqual(0, result.MatchedCount);
+        Assert.AreEqual(2, result.UnmatchedCount);
+        Assert.AreEqual(0, result.Metrics.ImportedRowCount);
+        Assert.AreEqual(0, result.SkippedDuplicateRowCount);
+        Assert.AreEqual(0, transactionRepository.Items.Count);
+
+        var batch = importBatchRepository.StoredBatches.Single();
+        Assert.AreEqual(0, batch.ImportedCount);
+        Assert.AreEqual(2, batch.SkippedCount);
+    }
+
+    [TestMethod]
+    public async Task ApplyCategorizationRulesUseCase_ReapplyIsIdempotentAfterFirstSuccessfulPass()
+    {
+        var categoryId = Guid.NewGuid();
+        var transactionRepository = new FakeTransactionRepository
+        {
+            Items =
+            [
+                new Transaction
+                {
+                    Id = Guid.NewGuid(),
+                    BookingDate = new DateOnly(2025, 6, 30),
+                    Description = "COMPRA TARJ. 5402XXXXXXXX7020 OPENAI *CHATGPT SUBSCR-SAN FRANCISCO",
+                    NormalizedDescription = "COMPRA TARJ. 5402XXXXXXXX7020 OPENAI *CHATGPT SUBSCR-SAN FRANCISCO",
+                    Amount = -20.72m
+                }
+            ]
+        };
+
+        var ruleRepository = new FakeRuleRepository
+        {
+            Rules =
+            [
+                new CategorizationRule
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Exact OpenAI",
+                    Pattern = "COMPRA TARJ. 5402XXXXXXXX7020 OPENAI *CHATGPT SUBSCR-SAN FRANCISCO",
+                    MatchType = RuleMatchType.Exact,
+                    Priority = 100,
+                    CategoryId = categoryId,
+                    IsActive = true
+                }
+            ]
+        };
+
+        var useCase = new ApplyCategorizationRulesUseCase(
+            transactionRepository,
+            ruleRepository,
+            new FakeManualOverrideRepository(),
+            new FakeCategoryRepository());
+
+        var first = await useCase.ExecuteAsync(new DateOnly(2025, 6, 1), new DateOnly(2025, 6, 30));
+        var second = await useCase.ExecuteAsync(new DateOnly(2025, 6, 1), new DateOnly(2025, 6, 30));
+
+        Assert.AreEqual(1, first.CategorizedCount);
+        Assert.AreEqual(0, second.CategorizedCount);
+        Assert.AreEqual(0, second.SkippedByManualOverrideCount);
+        Assert.AreEqual(0, second.NoMatchCount);
+        Assert.AreEqual(categoryId, transactionRepository.Items[0].CategoryId);
+    }
+
+    [TestMethod]
     public async Task DeleteAllRulesUseCase_RemovesAllActiveRules()
     {
         var ruleRepository = new FakeRuleRepository
@@ -920,6 +1167,39 @@ public sealed class ApplicationUseCaseTests
         Assert.AreEqual(1, result.AlreadySameCategoryCount);
         Assert.AreEqual(1, result.NotFoundCount);
         Assert.IsFalse(overrideRepository.OverridesByTransactionId.ContainsKey(existing.Id));
+    }
+
+    private static Transaction CreatePersistedTransactionFromRow(string row)
+    {
+        var parser = new BankStatementParser();
+        var parse = parser.Parse(row);
+        Assert.AreEqual(1, parse.Rows.Count);
+
+        var parsedRow = parse.Rows[0];
+        var now = DateTimeOffset.UtcNow;
+
+        return new Transaction
+        {
+            Id = Guid.NewGuid(),
+            BookingDate = parsedRow.BookingDate,
+            ValueDate = parsedRow.ValueDate,
+            Description = parsedRow.Description,
+            NormalizedDescription = DescriptionNormalizer.Normalize(parsedRow.Description),
+            TransactionFingerprint = TransactionFingerprintBuilder.Build(
+                parsedRow.BookingDate,
+                parsedRow.ValueDate,
+                parsedRow.Description,
+                parsedRow.Amount,
+                parsedRow.RunningBalance,
+                parsedRow.ExternalReference,
+                parsedRow.SourceAccount),
+            Amount = parsedRow.Amount,
+            Currency = "EUR",
+            SourceAccount = parsedRow.SourceAccount,
+            ExternalReference = parsedRow.ExternalReference,
+            CreatedUtc = now,
+            UpdatedUtc = now
+        };
     }
 
     private sealed class FakeMigrationRunner : IMigrationRunner

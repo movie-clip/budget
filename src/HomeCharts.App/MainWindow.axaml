@@ -10,12 +10,12 @@
         x:Class="HomeCharts.App.MainWindow"
         x:Name="RootWindow"
         x:DataType="mvp:MainWindowViewModel"
-        Width="1220"
-        Height="780"
-        MinWidth="980"
-        MinHeight="640"
+        Width="1400"
+        Height="900"
+        MinWidth="1200"
+        MinHeight="760"
         Background="#0B1020"
-        Title="Budget Dashboard Preview"
+        Title="HomeCharts"
         WindowState="Maximized"
         WindowStartupLocation="CenterScreen">
     <Grid ColumnDefinitions="220,*" RowDefinitions="*">
@@ -24,7 +24,7 @@
                 <TextBlock Text="HOME CHARTS" FontWeight="Bold" FontSize="18" Foreground="#E2E8F0" Margin="0,4,0,16"/>
 
                 <Grid ColumnDefinitions="4,*" ColumnSpacing="8">
-                    <Border Background="#3B82F6" CornerRadius="2" IsVisible="{Binding IsDashboardViewSelected}"/>
+                    <Border Classes="finance-accent-swatch" CornerRadius="2" IsVisible="{Binding IsDashboardViewSelected}"/>
                     <Button Grid.Column="1" Content="Dashboard"
                         Command="{Binding ShowDashboardViewCommand}"
                         Background="#111827"
@@ -34,7 +34,7 @@
                         Padding="12,10" />
                 </Grid>
                 <Grid ColumnDefinitions="4,*" ColumnSpacing="8">
-                    <Border Background="#3B82F6" CornerRadius="2" IsVisible="{Binding IsImportFiltersViewSelected}"/>
+                    <Border Classes="finance-accent-swatch" CornerRadius="2" IsVisible="{Binding IsImportFiltersViewSelected}"/>
                     <Button Grid.Column="1" Content="Import"
                     Command="{Binding ShowImportFiltersViewCommand}"
                     Background="#111827"
@@ -44,7 +44,7 @@
                     Padding="12,10" />
                 </Grid>
                 <Grid ColumnDefinitions="4,*" ColumnSpacing="8">
-                    <Border Background="#3B82F6" CornerRadius="2" IsVisible="{Binding IsLedgerViewSelected}"/>
+                    <Border Classes="finance-accent-swatch" CornerRadius="2" IsVisible="{Binding IsLedgerViewSelected}"/>
                     <Button Grid.Column="1" Content="Transactions"
                         Command="{Binding ShowLedgerViewCommand}"
                         Background="#111827"
@@ -54,7 +54,7 @@
                         Padding="12,10" />
                 </Grid>
                 <Grid ColumnDefinitions="4,*" ColumnSpacing="8">
-                    <Border Background="#3B82F6" CornerRadius="2" IsVisible="{Binding IsUtilityViewSelected}"/>
+                    <Border Classes="finance-accent-swatch" CornerRadius="2" IsVisible="{Binding IsUtilityViewSelected}"/>
                     <Button Grid.Column="1" Content="Utility"
                         Command="{Binding ShowUtilityViewCommand}"
                         Background="#111827"
@@ -67,7 +67,7 @@
                 <Border Background="#0B1223" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="12" Padding="12" Margin="0,20,0,0">
                     <StackPanel Spacing="8">
                         <TextBlock Text="Quick Actions" Foreground="#E2E8F0" FontWeight="SemiBold"/>
-                        <Button Content="Import Bank File" Background="#2563EB" Foreground="White" Command="{Binding ImportCommand}"/>
+                        <Button Classes="finance-primary" Content="Import Bank File" Command="{Binding ImportCommand}"/>
                         <Button Content="Refresh" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0" Command="{Binding RefreshCommand}"/>
                         <TextBlock Text="{Binding Status}" Foreground="#94A3B8" TextWrapping="Wrap"/>
                     </StackPanel>
@@ -76,96 +76,168 @@
         </Border>
 
         <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*" Margin="20" RowSpacing="16">
-            <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center" IsVisible="{Binding IsDashboardViewSelected}">
-                <StackPanel>
-                    <TextBlock Text="Budget Overview" FontSize="28" FontWeight="Bold" Foreground="#F8FAFC"/>
-                    <TextBlock Text="Standalone desktop preview · modern finance UX" Foreground="#94A3B8"/>
-                </StackPanel>
-                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                    <Button Content="Initialize" Background="#1E293B" Foreground="#E2E8F0" BorderBrush="#334155" Command="{Binding InitializeCommand}"/>
-                </StackPanel>
-            </Grid>
-
-            <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="14" IsVisible="{Binding IsDashboardViewSelected}">
-                <Border Background="#111827" CornerRadius="14" Padding="14" BorderBrush="#1F2937" BorderThickness="1">
-                    <StackPanel>
-                        <TextBlock Text="Income" Foreground="#94A3B8"/>
-                        <TextBlock Text="{Binding IncomeText, StringFormat='€{0}'}" Foreground="#F8FAFC" FontSize="28" FontWeight="Bold"/>
-                        <TextBlock Text="Cash in" Foreground="#22C55E"/>
+                <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center" IsVisible="{Binding IsDashboardViewSelected}">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Budget Overview" FontSize="28" FontWeight="Bold" Foreground="#F8FAFC"/>
                     </StackPanel>
-                </Border>
-                <Border Grid.Column="1" Background="#111827" CornerRadius="14" Padding="14" BorderBrush="#1F2937" BorderThickness="1">
-                    <StackPanel>
-                        <TextBlock Text="Expenses" Foreground="#94A3B8"/>
-                        <TextBlock Text="{Binding ExpensesText, StringFormat='€{0}'}" Foreground="#F8FAFC" FontSize="28" FontWeight="Bold"/>
-                        <TextBlock Text="Cash out" Foreground="#22C55E"/>
-                    </StackPanel>
-                </Border>
-                <Border Grid.Column="2" Background="#111827" CornerRadius="14" Padding="14" BorderBrush="#1F2937" BorderThickness="1">
-                    <StackPanel>
-                        <TextBlock Text="Uncategorized" Foreground="#94A3B8"/>
-                        <TextBlock Text="{Binding UncategorizedCountText, StringFormat='{}{0} tx'}" Foreground="#F8FAFC" FontSize="28" FontWeight="Bold"/>
-                        <TextBlock Text="Review rules" Foreground="#F59E0B"/>
-                    </StackPanel>
-                </Border>
-            </Grid>
+                </Grid>
 
-            <Grid Grid.Row="2">
-                <Grid ColumnDefinitions="1.6*,1.15*" ColumnSpacing="14" IsVisible="{Binding IsDashboardViewSelected}">
-                <Border Background="#111827" CornerRadius="14" BorderBrush="#1F2937" BorderThickness="1" Padding="16">
-                    <Grid RowDefinitions="Auto,*" RowSpacing="12">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="Monthly Spending Trend" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
-                            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                                <TextBlock Text="{Binding TrendRangeText}" Foreground="#94A3B8" VerticalAlignment="Center"/>
-                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                    <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                        <Border Width="8" Height="8" Background="#22C55E" CornerRadius="2" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Income" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                    <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                        <Border Width="8" Height="8" Background="#2563EB" CornerRadius="2" VerticalAlignment="Center"/>
-                                        <TextBlock Text="Expenses" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Center"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-                        </Grid>
-
-                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto" Margin="0,10,0,0">
-                            <ItemsControl ItemsSource="{Binding TrendChartBars}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel Orientation="Horizontal" Spacing="10"/>
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="mvp:DashboardTrendBarViewModel">
-                                        <StackPanel Width="46" Spacing="8" VerticalAlignment="Bottom">
-                                            <Grid Height="260" VerticalAlignment="Bottom">
-                                                <Grid ColumnDefinitions="*,*" ColumnSpacing="4" VerticalAlignment="Bottom" Margin="2,0,2,0">
-                                                    <Border Background="#22C55E" CornerRadius="4" Height="{Binding IncomeBarHeight}" VerticalAlignment="Bottom"/>
-                                                    <Border Grid.Column="1" Background="#2563EB" CornerRadius="4" Height="{Binding ExpensesBarHeight}" VerticalAlignment="Bottom"/>
-                                                </Grid>
-                                            </Grid>
-                                            <TextBlock Text="{Binding MonthLabel}" Foreground="#94A3B8" HorizontalAlignment="Center"/>
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
+            <Grid Grid.Row="1" ColumnDefinitions="*,*,*,*" ColumnSpacing="16" IsVisible="{Binding IsDashboardViewSelected}">
+                <Border Background="#111827" CornerRadius="18" Padding="18" BorderBrush="#1F2937" BorderThickness="1">
+                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                        <TextBlock Text="Income Total" Classes="finance-income" FontWeight="SemiBold"/>
+                        <TextBlock Grid.Row="1" Text="{Binding IncomeText, StringFormat='€{0}'}" Foreground="#F8FAFC" FontSize="30" FontWeight="Bold"/>
+                        <TextBlock Grid.Row="2" Text="Cash in across selected history" Classes="finance-income" FontSize="12" Opacity="0.85"/>
                     </Grid>
                 </Border>
+                <Border Grid.Column="1" Background="#111827" CornerRadius="18" Padding="18" BorderBrush="#1F2937" BorderThickness="1">
+                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                        <TextBlock Text="Expenses Total" Classes="finance-expense" FontWeight="SemiBold"/>
+                        <TextBlock Grid.Row="1" Text="{Binding ExpensesText, StringFormat='€{0}'}" Foreground="#F8FAFC" FontSize="30" FontWeight="Bold"/>
+                        <TextBlock Grid.Row="2" Text="Cash out across selected history" Classes="finance-expense" FontSize="12" Opacity="0.85"/>
+                    </Grid>
+                </Border>
+                <Border Grid.Column="2" Background="#111827" CornerRadius="18" Padding="18" BorderBrush="#1F2937" BorderThickness="1">
+                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                        <TextBlock Text="Net" Classes="finance-income" FontWeight="SemiBold"/>
+                        <TextBlock Grid.Row="1" Text="{Binding NetText, StringFormat='€{0}'}" Foreground="#F8FAFC" FontSize="30" FontWeight="Bold"/>
+                        <TextBlock Grid.Row="2" Text="What remains after spending" Classes="finance-income" FontSize="12" Opacity="0.85"/>
+                    </Grid>
+                </Border>
+                <Border Grid.Column="3" Background="#111827" CornerRadius="18" Padding="18" BorderBrush="#1F2937" BorderThickness="1">
+                    <Grid RowDefinitions="Auto,Auto,Auto" RowSpacing="8">
+                        <TextBlock Text="Avg Monthly Savings Rate" Classes="finance-income" FontWeight="SemiBold"/>
+                        <TextBlock Grid.Row="1" Text="{Binding SavingsRateText}" Foreground="#F8FAFC" FontSize="30" FontWeight="Bold"/>
+                        <TextBlock Grid.Row="2" Text="Average share of monthly income kept after expenses" Classes="finance-accent" FontSize="12" TextWrapping="Wrap"/>
+                    </Grid>
+                </Border>
+            </Grid>
 
-                <Border Grid.Column="1" Background="#111827" CornerRadius="14" BorderBrush="#1F2937" BorderThickness="1" Padding="16">
+            <Grid Grid.Row="2" IsVisible="{Binding IsDashboardViewSelected}" ColumnDefinitions="1.45*,1.1*" ColumnSpacing="14">
+                <Grid RowDefinitions="Auto,Auto,*" RowSpacing="14">
+                    <Border Background="#111827" CornerRadius="18" BorderBrush="#1F2937" BorderThickness="1" Padding="18">
+                            <Grid RowDefinitions="Auto,*" RowSpacing="12">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="Cash Flow Trend" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding TrendRangeText}" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                <Border Classes="finance-income-swatch" Width="8" Height="8" CornerRadius="2" VerticalAlignment="Center"/>
+                                                <TextBlock Text="Income" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                                <Border Classes="finance-expense-swatch" Width="8" Height="8" CornerRadius="2" VerticalAlignment="Center"/>
+                                                <TextBlock Text="Expenses" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Grid.Row="1" Margin="0,6,0,0">
+                                    <ItemsControl ItemsSource="{Binding TrendChartBars}" HorizontalAlignment="Stretch">
+                                        <ItemsControl.ItemsPanel>
+                                            <ItemsPanelTemplate>
+                                                <UniformGrid Rows="1"/>
+                                            </ItemsPanelTemplate>
+                                        </ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="mvp:DashboardTrendBarViewModel">
+                                                <Grid Margin="2,0,2,0" VerticalAlignment="Stretch">
+                                                    <Grid RowDefinitions="*,Auto" RowSpacing="8">
+                                                        <Grid Height="250" VerticalAlignment="Bottom">
+                                                            <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="3" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Margin="0,0,0,4">
+                                                                <Border Classes="finance-income-swatch"
+                                                                        CornerRadius="4"
+                                                                        Height="{Binding IncomeBarHeight}"
+                                                                        Width="{Binding IncomeBarWidth}"
+                                                                        VerticalAlignment="Bottom"
+                                                                        HorizontalAlignment="Center"
+                                                                        ToolTip.Tip="{Binding IncomeTooltip}"/>
+                                                                <Border Grid.Column="1"
+                                                                        Classes="finance-expense-swatch"
+                                                                        CornerRadius="4"
+                                                                        Height="{Binding ExpensesBarHeight}"
+                                                                        Width="{Binding ExpensesBarWidth}"
+                                                                        VerticalAlignment="Bottom"
+                                                                        HorizontalAlignment="Center"
+                                                                        ToolTip.Tip="{Binding ExpensesTooltip}"/>
+                                                            </Grid>
+                                                        </Grid>
+                                                        <TextBlock Grid.Row="1" Text="{Binding MonthLabel}" Foreground="#94A3B8" HorizontalAlignment="Center"/>
+                                                    </Grid>
+                                                </Grid>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </Grid>
+                            </Grid>
+                    </Border>
+
+                    <Grid Grid.Row="1" ColumnDefinitions="1.08*,1.02*" ColumnSpacing="14">
+                            <Border Background="#111827" CornerRadius="18" BorderBrush="#1F2937" BorderThickness="1" Padding="18">
+                                <Grid RowDefinitions="Auto,*" RowSpacing="10" Height="380">
+                                    <TextBlock Text="Largest Expenses This Month" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
+                                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                        <ItemsControl ItemsSource="{Binding LargestExpenseRows}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="mvp:DashboardLargestExpenseViewModel">
+                                                    <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="12" Padding="12" Margin="0,0,0,8">
+                                                        <Grid ColumnDefinitions="90,*,100" ColumnSpacing="8">
+                                                            <TextBlock Text="{Binding BookingDate}" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Center"/>
+                                                            <StackPanel Grid.Column="1" Spacing="2">
+                                                                <TextBlock Text="{Binding Description}" Foreground="#E2E8F0" TextTrimming="CharacterEllipsis" FontWeight="SemiBold"/>
+                                                                <TextBlock Text="{Binding Category}" Foreground="#64748B" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                                                            </StackPanel>
+                                                            <TextBlock Grid.Column="2" Text="{Binding AmountText, StringFormat='€{0}'}" Classes="finance-expense" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold"/>
+                                                        </Grid>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                            </Border>
+
+                            <Border Grid.Column="1" Background="#111827" CornerRadius="18" BorderBrush="#1F2937" BorderThickness="1" Padding="18">
+                                <Grid RowDefinitions="Auto,*" RowSpacing="10" Height="372">
+                                    <TextBlock Text="Recurring Expenses" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
+                                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                        <ItemsControl ItemsSource="{Binding RecurringExpenseRows}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="mvp:DashboardRecurringExpenseViewModel">
+                                                    <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="12" Padding="12" Margin="0,0,0,8">
+                                                        <StackPanel Spacing="4">
+                                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                                <TextBlock Text="{Binding Description}" Foreground="#E2E8F0" TextTrimming="CharacterEllipsis" FontWeight="SemiBold"/>
+                                                                <TextBlock Grid.Column="1" Text="{Binding AverageAmountText, StringFormat='€{0}'}" Classes="finance-accent" FontWeight="SemiBold"/>
+                                                            </Grid>
+                                                            <TextBlock Text="{Binding Category}" Foreground="#94A3B8" FontSize="11"/>
+                                                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                                                <TextBlock Text="{Binding InsightText}" Foreground="#64748B" FontSize="11"/>
+                                                                <TextBlock Grid.Column="1" Text="{Binding LastSeen}" Foreground="#64748B" FontSize="11" HorizontalAlignment="Right"/>
+                                                            </Grid>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                            </Border>
+                    </Grid>
+                </Grid>
+
+                <Border Grid.Column="1" Background="#111827" CornerRadius="18" BorderBrush="#1F2937" BorderThickness="1" Padding="18">
                     <Grid RowDefinitions="Auto,Auto,*" RowSpacing="10">
-                        <TextBlock Text="Expenses" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
-                        <TextBlock Grid.Row="1" Text="Category distribution" Foreground="#94A3B8"/>
+                            <TextBlock Text="Expenses" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
+                            <TextBlock Grid.Row="1" Text="Category distribution" Foreground="#94A3B8"/>
 
-                        <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                            <ItemsControl ItemsSource="{Binding ExpenseCategoryBars}" HorizontalAlignment="Stretch">
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="mvp:DashboardExpenseCategoryBarViewModel">
-                                        <Grid Margin="0,0,0,8" RowDefinitions="Auto,Auto" RowSpacing="6" HorizontalAlignment="Stretch">
+                            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="700">
+                                <ItemsControl ItemsSource="{Binding ExpenseCategoryBars}" HorizontalAlignment="Stretch">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="mvp:DashboardExpenseCategoryBarViewModel">
+                                            <Grid Margin="0,0,0,8" RowDefinitions="Auto,Auto" RowSpacing="6" HorizontalAlignment="Stretch">
                                             <ToggleButton IsChecked="{Binding IsExpanded, Mode=TwoWay}"
                                                           Background="Transparent"
                                                           BorderBrush="Transparent"
@@ -184,7 +256,7 @@
                                                             <TextBlock Text="{Binding Category}" Foreground="#CBD5E1" TextTrimming="CharacterEllipsis"/>
                                                             <TextBlock Grid.Column="1" Text="{Binding AmountText, StringFormat='€{0}'}" Foreground="#CBD5E1"/>
                                                         </Grid>
-                                                        <ProgressBar Minimum="0" Maximum="100" Value="{Binding Percent}" Height="10" Foreground="#3B82F6" Background="Transparent"/>
+                                                        <ProgressBar Minimum="0" Maximum="100" Value="{Binding Percent}" Height="10" Foreground="#3B82F6" Background="#172033"/>
                                                         <TextBlock Text="{Binding Transactions, StringFormat='{}{0} transactions'}" Foreground="#94A3B8" FontSize="11"/>
                                                     </StackPanel>
                                                 </Border>
@@ -212,20 +284,19 @@
                                                     </ItemsControl>
                                                 </ScrollViewer>
                                             </Border>
-                                        </Grid>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </ScrollViewer>
-                    </Grid>
+                                            </Grid>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
                 </Border>
-                </Grid>
-
-            <Border Background="#111827" CornerRadius="14" BorderBrush="#1F2937" BorderThickness="1" Padding="16" IsVisible="{Binding IsImportFiltersViewSelected}">
+            </Grid>
+            <Border Background="#111827" CornerRadius="14" BorderBrush="#1F2937" BorderThickness="1" Padding="18" IsVisible="{Binding IsImportFiltersViewSelected}">
                 <Grid RowDefinitions="Auto,*" RowSpacing="14">
-                    <Grid ColumnDefinitions="*,*,Auto" ColumnSpacing="14">
-                        <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10" Padding="16">
-                            <StackPanel Spacing="10">
+                    <Grid ColumnDefinitions="1.15*,1.15*,0.7*" ColumnSpacing="18">
+                        <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="12" Padding="18">
+                            <StackPanel Spacing="12">
                                 <TextBlock Text="Import &amp; Search" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
                                 <TextBox Text="{Binding ImportFilePath}" Watermark="Path to bank file..."/>
                                 <Button Content="Browse..." Click="OnBrowseImportFileClick" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0"/>
@@ -233,8 +304,8 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Grid.Column="1" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10" Padding="16">
-                            <StackPanel Spacing="8">
+                        <Border Grid.Column="1" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="12" Padding="18">
+                            <StackPanel Spacing="10">
                                 <TextBlock Text="Import Status" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
                                 <TextBlock Text="{Binding LastImportSummary}" Foreground="#CBD5E1" TextWrapping="Wrap"/>
                                 <TextBlock Text="{Binding LastImportDetails}" Foreground="#CBD5E1" TextWrapping="Wrap"/>
@@ -242,35 +313,35 @@
                             </StackPanel>
                         </Border>
 
-                        <Border Grid.Column="2" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10" Padding="16" MinWidth="180">
+                        <Border Grid.Column="2" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="12" Padding="18" MinWidth="220">
                             <StackPanel Spacing="10" VerticalAlignment="Center">
                                 <TextBlock Text="Rules Actions" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold"/>
                                 <Button Content="Clear All Rules"
+                                    Classes="finance-danger"
                                     Click="OnClearAllRulesClick"
-                                        Background="#7F1D1D"
-                                        Foreground="White"
-                                        BorderBrush="#B91C1C" />
+                                    />
                                 <TextBlock Text="Deletes all existing categorization rules." Foreground="#94A3B8" TextWrapping="Wrap"/>
                             </StackPanel>
                         </Border>
                     </Grid>
 
-                    <Grid Grid.Row="1" ColumnDefinitions="2*,*" ColumnSpacing="14">
-                        <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10" Padding="12">
+                    <Grid Grid.Row="1" ColumnDefinitions="1.7*,1*" ColumnSpacing="18">
+                        <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="12" Padding="14">
                             <Grid RowDefinitions="Auto,*" RowSpacing="10">
-                                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                                <WrapPanel Orientation="Horizontal" ItemHeight="32" VerticalAlignment="Center">
                                     <TextBlock Text="Potential New Rules" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding RulesQueueSummary}" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding RulesQueueSummary}" Foreground="#94A3B8" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                    <Button Classes="finance-primary" Content="Apply All" Command="{Binding SaveAllPotentialRulesCommand}" Margin="12,0,0,0"/>
                                     <Button Content="Refresh Queue" Command="{Binding RefreshRulesQueueCommand}" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0"/>
                                     <Button Content="Prev" Command="{Binding PreviousRulesQueuePageCommand}" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0"/>
                                     <Button Content="Next" Command="{Binding NextRulesQueuePageCommand}" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0"/>
-                                    <TextBlock Text="{Binding RulesQueuePageInfo}" Foreground="#94A3B8" VerticalAlignment="Center"/>
-                                </StackPanel>
+                                    <TextBlock Text="{Binding RulesQueuePageInfo}" Foreground="#94A3B8" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                </WrapPanel>
 
-                                <Border Grid.Row="1" Background="#111827" BorderBrush="#334155" BorderThickness="1" CornerRadius="8" Padding="10" MinHeight="230">
+                                <Border Grid.Row="1" Background="#111827" BorderBrush="#334155" BorderThickness="1" CornerRadius="10" Padding="12" MinHeight="280">
                                     <Grid RowDefinitions="Auto,*" RowSpacing="10">
                                         <Border Background="#0B1223" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="8,6">
-                                            <Grid ColumnDefinitions="120,*,110,200,100" ColumnSpacing="10">
+                                            <Grid ColumnDefinitions="110,*,110,190,96" ColumnSpacing="10">
                                                 <TextBlock Text="Date" Foreground="#94A3B8" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                                 <TextBlock Grid.Column="1" Text="Description / Match String" Foreground="#94A3B8" FontWeight="SemiBold" VerticalAlignment="Center"/>
                                                 <TextBlock Grid.Column="2" Text="Amount" Foreground="#94A3B8" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
@@ -283,11 +354,11 @@
                                             <ItemsControl ItemsSource="{Binding ImportedRuleTransactions}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate x:DataType="mvp:EditableRulesImportedTransactionViewModel">
-                                                        <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10" Padding="10" Margin="0,0,0,8">
-                                                            <Grid ColumnDefinitions="120,*,110,200,100" ColumnSpacing="10" VerticalAlignment="Center">
+                                                        <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,8">
+                                                            <Grid ColumnDefinitions="110,*,110,190,96" ColumnSpacing="10" VerticalAlignment="Center">
                                                                 <TextBlock Text="{Binding BookingDateText}" Foreground="#CBD5E1" VerticalAlignment="Center"/>
                                                                 <TextBox Grid.Column="1"
-                                                                         Text="{Binding Description}"
+                                                                          Text="{Binding Description}"
                                                                          Watermark="Type matching string..."
                                                                          Background="#111827"
                                                                          BorderBrush="#334155"
@@ -307,11 +378,10 @@
                                                                     </ComboBox.ItemTemplate>
                                                                 </ComboBox>
                                                                 <Button Grid.Column="4"
+                                                                        Classes="finance-primary"
                                                                         Content="Save"
                                                                         Command="{ReflectionBinding DataContext.SavePotentialRuleCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                                         CommandParameter="{Binding .}"
-                                                                        Background="#2563EB"
-                                                                        Foreground="White"
                                                                         HorizontalAlignment="Stretch"
                                                                         VerticalAlignment="Center"
                                                                         Padding="12,6"/>
@@ -326,7 +396,7 @@
                             </Grid>
                         </Border>
 
-                        <Border Grid.Column="1" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10" Padding="12">
+                        <Border Grid.Column="1" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="12" Padding="14">
                             <Grid RowDefinitions="Auto,*" RowSpacing="10">
                                 <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                                     <TextBlock Text="Expenses" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
@@ -337,10 +407,10 @@
                                     <ItemsControl ItemsSource="{Binding ParsedCategoryExpenses}">
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="mvp:ParsedCategoryExpenseViewModel">
-                                                <Border Background="#111827" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="10" Margin="0,0,0,8">
-                                                    <Grid ColumnDefinitions="*,120,130" ColumnSpacing="10">
+                                                <Border Background="#111827" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,8">
+                                                    <Grid ColumnDefinitions="*,120,130" ColumnSpacing="12">
                                                         <TextBlock Text="{Binding Category}" Foreground="#E2E8F0" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                                        <TextBlock Grid.Column="1" Text="{Binding ExpenseAmountText, StringFormat='€{0}'}" Foreground="#CBD5E1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                        <TextBlock Grid.Column="1" Text="{Binding ExpenseAmountText, StringFormat='€{0}'}" Classes="finance-expense" HorizontalAlignment="Right" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                                         <TextBlock Grid.Column="2" Text="{Binding Transactions, StringFormat='{}{0} transactions'}" Foreground="#94A3B8" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                     </Grid>
                                                 </Border>
@@ -354,16 +424,16 @@
                 </Grid>
             </Border>
 
-            <Border Background="#111827" CornerRadius="14" BorderBrush="#1F2937" BorderThickness="1" Padding="16" IsVisible="{Binding IsLedgerViewSelected}">
+            <Border Background="#111827" CornerRadius="14" BorderBrush="#1F2937" BorderThickness="1" Padding="18" IsVisible="{Binding IsLedgerViewSelected}">
                 <Grid RowDefinitions="Auto,*" RowSpacing="12">
                     <StackPanel Spacing="10">
                         <TextBlock Text="Transactions" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
 
-                        <Grid ColumnDefinitions="*,Auto,220,250" ColumnSpacing="10">
+                        <Grid ColumnDefinitions="1.2*,Auto,220,220" ColumnSpacing="12">
                             <TextBox Text="{Binding ImportFilePath}" Watermark="Path to bank file..."/>
                             <Button Grid.Column="1" Content="Browse..." Click="OnBrowseTransactionsFileClick" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0"/>
-                            <Button Grid.Column="2" Content="Merge Matched into Budget" Command="{Binding MergeMatchedTransactionsCommand}" Background="#2563EB" Foreground="White"/>
-                            <Button Grid.Column="3" Content="Clean All Transactions" Click="OnClearAllTransactionsClick" Background="#7F1D1D" Foreground="White" BorderBrush="#B91C1C"/>
+                            <Button Grid.Column="2" Classes="finance-primary" Content="Merge Matched into Budget" Command="{Binding MergeMatchedTransactionsCommand}"/>
+                            <Button Grid.Column="3" Classes="finance-danger" Content="Clean All Transactions" Click="OnClearAllTransactionsClick"/>
                         </Grid>
 
                         <TextBlock Text="{Binding MatchedTransactionsSummary}" Foreground="#94A3B8"/>
@@ -378,8 +448,8 @@
                                                     <TextBlock Text="{Binding BookingDateText}" Foreground="#CBD5E1" VerticalAlignment="Center"/>
                                                     <TextBlock Grid.Column="1" Text="{Binding Description}" Foreground="#E2E8F0" TextWrapping="Wrap" VerticalAlignment="Center"/>
                                                     <TextBlock Grid.Column="2" Text="{Binding AmountText}" Foreground="#CBD5E1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                    <TextBlock Grid.Column="3" Text="{Binding Category}" Foreground="#93C5FD" VerticalAlignment="Center"/>
-                                                    <TextBlock Grid.Column="4" Text="{Binding RuleName}" Foreground="#FDE68A" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="3" Text="{Binding Category}" Classes="finance-accent" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="4" Text="{Binding RuleName}" Classes="finance-warning" VerticalAlignment="Center"/>
                                                     <TextBlock Grid.Column="5" Text="{Binding SourceAccount}" Foreground="#94A3B8" VerticalAlignment="Center"/>
                                                 </Grid>
                                             </Border>
@@ -389,7 +459,7 @@
                             </ScrollViewer>
                         </Border>
 
-                        <WrapPanel Orientation="Horizontal" ItemWidth="170" ItemHeight="34">
+                        <WrapPanel Orientation="Horizontal" ItemWidth="180" ItemHeight="36">
                             <TextBox Text="{Binding SearchText}" Watermark="Search text..." MinWidth="180"/>
 
                             <ComboBox ItemsSource="{Binding DatePresetOptions}"
@@ -425,7 +495,7 @@
                         </WrapPanel>
 
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <Button Content="Apply Filters" Command="{Binding ApplyFiltersCommand}" Background="#2563EB" Foreground="White"/>
+                            <Button Classes="finance-primary" Content="Apply Filters" Command="{Binding ApplyFiltersCommand}"/>
                             <Button Content="Reset" Command="{Binding ResetTransactionFiltersCommand}" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0"/>
                             <Button Content="Prev" Command="{Binding PreviousPageCommand}" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0"/>
                             <Button Content="Next" Command="{Binding NextPageCommand}" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0"/>
@@ -433,7 +503,7 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <Grid Grid.Row="1" ColumnDefinitions="2*,*" ColumnSpacing="12">
+                    <Grid Grid.Row="1" ColumnDefinitions="1.8*,1*" ColumnSpacing="16">
                         <dg:DataGrid ItemsSource="{Binding LedgerItems}"
                                      SelectedItem="{Binding SelectedLedgerItem}"
                                      AutoGenerateColumns="False"
@@ -450,8 +520,8 @@
                             </dg:DataGrid.Columns>
                         </dg:DataGrid>
 
-                        <Border Grid.Column="1" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10" Padding="12">
-                            <StackPanel Spacing="8">
+                        <Border Grid.Column="1" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="12" Padding="16">
+                            <StackPanel Spacing="10">
                                 <TextBlock Text="Transaction Details" Foreground="#F8FAFC" FontSize="16" FontWeight="SemiBold"/>
                                 <TextBlock Text="Booking: {Binding SelectedTransactionDetail.BookingDate}" Foreground="#CBD5E1" TextWrapping="Wrap"/>
                                 <TextBlock Text="Value: {Binding SelectedTransactionDetail.ValueDate}" Foreground="#CBD5E1" TextWrapping="Wrap"/>
@@ -469,17 +539,16 @@
                 </Grid>
             </Border>
 
-            <Border Background="#111827" CornerRadius="14" BorderBrush="#1F2937" BorderThickness="1" Padding="16" IsVisible="{Binding IsUtilityViewSelected}">
+            <Border Background="#111827" CornerRadius="14" BorderBrush="#1F2937" BorderThickness="1" Padding="18" IsVisible="{Binding IsUtilityViewSelected}">
                 <Grid RowDefinitions="Auto,Auto,*,Auto" RowSpacing="14">
                     <TextBlock Text="Description Prefix Filters" Foreground="#F8FAFC" FontSize="20" FontWeight="SemiBold"/>
 
                     <Grid Grid.Row="1" ColumnDefinitions="*,120" ColumnSpacing="10">
                         <TextBox Text="{Binding NewPrefixFilter}" Watermark="Prefix to hide from displayed descriptions..."/>
                         <Button Grid.Column="1"
+                                Classes="finance-primary"
                                 Content="Add"
-                                Command="{Binding AddPrefixFilterCommand}"
-                                Background="#2563EB"
-                                Foreground="White"/>
+                                Command="{Binding AddPrefixFilterCommand}"/>
                     </Grid>
 
                     <Border Grid.Row="2" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10" Padding="10" MinHeight="220">
@@ -494,12 +563,10 @@
                                                 <Grid ColumnDefinitions="*,100" ColumnSpacing="10">
                                                     <TextBlock Text="{Binding Value}" Foreground="#E2E8F0" TextWrapping="Wrap" VerticalAlignment="Center"/>
                                                     <Button Grid.Column="1"
+                                                            Classes="finance-danger"
                                                             Content="Remove"
                                                             Command="{ReflectionBinding DataContext.RemovePrefixFilterCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                            CommandParameter="{Binding .}"
-                                                            Background="#7F1D1D"
-                                                            Foreground="White"
-                                                            BorderBrush="#B91C1C"/>
+                                                            CommandParameter="{Binding .}"/>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
@@ -516,7 +583,6 @@
                 </Grid>
             </Border>
 
-            </Grid>
         </Grid>
     </Grid>
 </Window>
