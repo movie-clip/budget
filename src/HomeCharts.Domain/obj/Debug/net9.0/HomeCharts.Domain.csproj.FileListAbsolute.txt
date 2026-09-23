@@ -10,3 +10,15 @@ C:\projects\NET\budget\src\HomeCharts.Domain\obj\Debug\net9.0\HomeCharts.Domain.
 C:\projects\NET\budget\src\HomeCharts.Domain\obj\Debug\net9.0\refint\HomeCharts.Domain.dll
 C:\projects\NET\budget\src\HomeCharts.Domain\obj\Debug\net9.0\HomeCharts.Domain.pdb
 C:\projects\NET\budget\src\HomeCharts.Domain\obj\Debug\net9.0\ref\HomeCharts.Domain.dll
+C:\projects\investments\budget\src\HomeCharts.Domain\bin\Debug\net9.0\HomeCharts.Domain.deps.json
+C:\projects\investments\budget\src\HomeCharts.Domain\bin\Debug\net9.0\HomeCharts.Domain.dll
+C:\projects\investments\budget\src\HomeCharts.Domain\bin\Debug\net9.0\HomeCharts.Domain.pdb
+C:\projects\investments\budget\src\HomeCharts.Domain\obj\Debug\net9.0\HomeCharts.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\projects\investments\budget\src\HomeCharts.Domain\obj\Debug\net9.0\HomeCharts.Domain.AssemblyInfoInputs.cache
+C:\projects\investments\budget\src\HomeCharts.Domain\obj\Debug\net9.0\HomeCharts.Domain.AssemblyInfo.cs
+C:\projects\investments\budget\src\HomeCharts.Domain\obj\Debug\net9.0\HomeCharts.Domain.csproj.CoreCompileInputs.cache
+C:\projects\investments\budget\src\HomeCharts.Domain\obj\Debug\net9.0\HomeCharts.Domain.sourcelink.json
+C:\projects\investments\budget\src\HomeCharts.Domain\obj\Debug\net9.0\HomeCharts.Domain.dll
+C:\projects\investments\budget\src\HomeCharts.Domain\obj\Debug\net9.0\refint\HomeCharts.Domain.dll
+C:\projects\investments\budget\src\HomeCharts.Domain\obj\Debug\net9.0\HomeCharts.Domain.pdb
+C:\projects\investments\budget\src\HomeCharts.Domain\obj\Debug\net9.0\ref\HomeCharts.Domain.dll

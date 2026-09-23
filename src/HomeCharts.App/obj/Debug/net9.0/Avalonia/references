@@ -24,11 +24,11 @@ C:\Users\MovieClip\.nuget\packages\avalonia.win32\11.3.12\lib\net8.0\Avalonia.Wi
 C:\Users\MovieClip\.nuget\packages\avalonia.win32\11.3.12\lib\net8.0\Avalonia.Win32.dll
 C:\Users\MovieClip\.nuget\packages\avalonia.x11\11.3.12\lib\net8.0\Avalonia.X11.dll
 C:\Users\MovieClip\.nuget\packages\harfbuzzsharp\8.3.1.1\lib\net8.0\HarfBuzzSharp.dll
-C:\projects\NET\budget\src\HomeCharts.Application\obj\Debug\net9.0\ref\HomeCharts.Application.dll
-C:\projects\NET\budget\src\HomeCharts.Contracts\obj\Debug\net9.0\ref\HomeCharts.Contracts.dll
-C:\projects\NET\budget\src\HomeCharts.Domain\obj\Debug\net9.0\ref\HomeCharts.Domain.dll
-C:\projects\NET\budget\src\HomeCharts.Infrastructure\obj\Debug\net9.0\ref\HomeCharts.Infrastructure.dll
-C:\projects\NET\budget\src\HomeCharts.Presentation\obj\Debug\net9.0\ref\HomeCharts.Presentation.dll
+C:\projects\investments\budget\src\HomeCharts.Application\obj\Debug\net9.0\ref\HomeCharts.Application.dll
+C:\projects\investments\budget\src\HomeCharts.Contracts\obj\Debug\net9.0\ref\HomeCharts.Contracts.dll
+C:\projects\investments\budget\src\HomeCharts.Domain\obj\Debug\net9.0\ref\HomeCharts.Domain.dll
+C:\projects\investments\budget\src\HomeCharts.Infrastructure\obj\Debug\net9.0\ref\HomeCharts.Infrastructure.dll
+C:\projects\investments\budget\src\HomeCharts.Presentation\obj\Debug\net9.0\ref\HomeCharts.Presentation.dll
 C:\Users\MovieClip\.nuget\packages\microcom.runtime\0.11.0\lib\net5.0\MicroCom.Runtime.dll
 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\9.0.5\ref\net9.0\Microsoft.CSharp.dll
 C:\Users\MovieClip\.nuget\packages\microsoft.data.sqlite.core\9.0.0\lib\net8.0\Microsoft.Data.Sqlite.dll

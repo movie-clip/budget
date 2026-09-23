@@ -14,11 +14,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\projects\\NET\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj",
+      "projectUniqueName": "C:\\projects\\investments\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj",
       "projectName": "HomeCharts.Domain",
-      "projectPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj",
+      "projectPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj",
       "packagesPath": "C:\\Users\\MovieClip\\.nuget\\packages\\",
-      "outputPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Domain\\obj\\",
+      "outputPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Domain\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

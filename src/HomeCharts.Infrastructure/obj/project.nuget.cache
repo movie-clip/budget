@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "TC8lw3u1ciw=",
+  "dgSpecHash": "50XxAAnZdJ0=",
   "success": true,
-  "projectFilePath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Infrastructure\\HomeCharts.Infrastructure.csproj",
+  "projectFilePath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Infrastructure\\HomeCharts.Infrastructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\MovieClip\\.nuget\\packages\\microsoft.data.sqlite\\9.0.0\\microsoft.data.sqlite.9.0.0.nupkg.sha512",
     "C:\\Users\\MovieClip\\.nuget\\packages\\microsoft.data.sqlite.core\\9.0.0\\microsoft.data.sqlite.core.9.0.0.nupkg.sha512",
