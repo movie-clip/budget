@@ -28,9 +28,11 @@ public sealed class BuildDashboardSnapshotUseCase(
         var uncategorizedAmount = uncategorized
             .Where(static transaction => transaction.Amount < 0m)
             .Sum(static transaction => Math.Abs(transaction.Amount));
-        var anchorDate = transactions.Count == 0
-            ? DateOnly.FromDateTime(DateTime.Today)
+        var today = DateOnly.FromDateTime(DateTime.Today);
+        var latestBookingDate = transactions.Count == 0
+            ? today
             : transactions.Max(static transaction => transaction.BookingDate);
+        var anchorDate = latestBookingDate < today ? latestBookingDate : today;
         var currentMonthStart = new DateOnly(anchorDate.Year, anchorDate.Month, 1);
         var previousMonthStart = currentMonthStart.AddMonths(-1);
 

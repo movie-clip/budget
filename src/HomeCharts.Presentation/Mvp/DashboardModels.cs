@@ -21,15 +21,19 @@ public sealed record DashboardTrendBarViewModel(
     public string IncomeTooltip => $"Income: EUR {Income:0.00}";
     public string ExpensesTooltip => $"Expenses: EUR {Expenses:0.00}";
 
+    public bool NetIsPositive => Net >= 0m;
+    public string NetSignedText => (NetIsPositive ? "+" : "-") + Math.Abs(Net).ToString("0.00");
+    public string NetTooltip => $"Net: EUR {Net:0.00}";
+
     public string MonthLabel
         => DateTime.TryParseExact(Month, "yyyy-MM", CultureInfo.InvariantCulture, DateTimeStyles.None, out var parsed)
             ? parsed.ToString("MMM", CultureInfo.InvariantCulture)
             : Month;
 
-    public double IncomeBarWidth => 16d;
+    public double IncomeBarWidth => 18d;
     public double IncomeBarHeight => IncomePercent <= 0d ? 0d : Math.Max(6d, IncomePercent * 2.4d);
     public double ExpensesBarHeight => ExpensesPercent <= 0d ? 0d : Math.Max(6d, ExpensesPercent * 2.4d);
-    public double ExpensesBarWidth => 16d;
+    public double ExpensesBarWidth => 18d;
 }
 
 public sealed class DashboardExpenseCategoryBarViewModel : ObservableObject

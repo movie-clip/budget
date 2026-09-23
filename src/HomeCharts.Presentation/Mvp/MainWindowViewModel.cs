@@ -1169,18 +1169,23 @@ public sealed class MainWindowViewModel : ObservableObject
             TrendRangeText = "No trend data";
         }
 
-        var maxIncome = snapshot.MonthlyTrend.Any() ? snapshot.MonthlyTrend.Max(point => Math.Abs(point.Income)) : 0m;
-        var maxExpenses = snapshot.MonthlyTrend.Any() ? snapshot.MonthlyTrend.Max(point => Math.Abs(point.Expenses)) : 0m;
+        // Shared scale across both series: a month's expense bar must render visibly
+        // taller than its income bar when expenses genuinely exceed income, and vice
+        // versa. Two independent per-series maxima would make bar heights comparable
+        // only within their own series, not against each other.
+        var sharedMax = snapshot.MonthlyTrend.Any()
+            ? snapshot.MonthlyTrend.SelectMany(point => new[] { Math.Abs(point.Income), Math.Abs(point.Expenses) }).Max()
+            : 0m;
 
         foreach (var point in snapshot.MonthlyTrend)
         {
-            var incomePercent = maxIncome <= 0m
+            var incomePercent = sharedMax <= 0m
                 ? 0d
-                : Math.Round((double)(Math.Abs(point.Income) / maxIncome * 100m), 2);
+                : Math.Round((double)(Math.Abs(point.Income) / sharedMax * 100m), 2);
 
-            var expensesPercent = maxExpenses <= 0m
+            var expensesPercent = sharedMax <= 0m
                 ? 0d
-                : Math.Round((double)(Math.Abs(point.Expenses) / maxExpenses * 100m), 2);
+                : Math.Round((double)(Math.Abs(point.Expenses) / sharedMax * 100m), 2);
 
             TrendChartBars.Add(new DashboardTrendBarViewModel(
                 point.Month.ToString("yyyy-MM"),

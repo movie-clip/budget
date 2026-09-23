@@ -42,6 +42,7 @@ SQLite DB path is under local app data (`HomeCharts` folder), with migrations ap
 - `BuildDashboardSnapshotUseCase`
   - Produces read-model for KPI, monthly trend, category breakdown, uncategorized queue, month-over-month comparison, coverage, largest expenses, and recurring expenses
   - `MonthComparison` (current-vs-previous month deltas) and the uncategorized queue are consumed by the Dashboard UI (the month-comparison strip and the Needs Attention panel, respectively)
+  - The monthly trend's 12-month window anchors at `Min(DateOnly.Today, Max(BookingDate) among the fetched transactions)`, so a transaction with a future booking date cannot pull the window forward past the current month
 
 ## 4. Deterministic Categorization
 
@@ -67,6 +68,7 @@ Important persisted concepts:
   - fingerprint for deduplication
   - optional source account and external reference
   - category assignment
+  - `is_deleted` soft-delete flag; date-range reads used by the dashboard (`GetByDateRangeAsync`) filter it out, matching the existing fingerprint-lookup query
 
 - `categorization_rules`
   - match type, pattern, priority, active flag
@@ -91,7 +93,11 @@ Dashboard expenses panel supports:
 - hover-highlighted rows,
 - constrained dropdown list for category transactions.
 
-Trend panel shows side-by-side monthly income/expense bars.
+Trend panel shows side-by-side monthly income/expense bars, scaled against a
+single shared maximum across both series so bar heights are comparable in
+absolute terms (not each series against its own independent peak). Each
+month also renders a signed net indicator (green when positive, red when
+negative) between the bars and the month label.
 
 ## 7. Testing Strategy
 

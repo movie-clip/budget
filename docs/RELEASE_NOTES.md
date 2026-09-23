@@ -1,5 +1,34 @@
 # Release Notes
 
+## 2026-09-23 — Cash Flow Trend Chart: Data-Accuracy Fixes + Redesign
+
+### Data Accuracy
+
+- Dashboard/ledger date-range transaction reads (`GetByDateRangeAsync`) now
+  filter out soft-deleted rows (`is_deleted = 0`), matching the existing
+  fingerprint-lookup query in the same repository.
+- Monthly trend window anchor is now capped at today
+  (`Min(DateOnly.Today, Max(BookingDate))`), so a future-booked transaction
+  can no longer pull the 12-month trend window forward past the current
+  month.
+
+### Product/UX
+
+- Cash Flow Trend chart: income and expense bars are now scaled against one
+  shared maximum across both series, so bar heights are comparable in
+  absolute terms (previously each series was scaled independently against
+  its own peak).
+- Cash Flow Trend chart redesigned: gradient-filled income/expense bars,
+  per-month hover highlight, a signed net indicator (green/red) per month,
+  and a restyled header with a subtitle line, range pill, and net legend
+  swatch.
+
+### Validation
+
+- `dotnet build HomeCharts.sln` ✅
+- `dotnet build src/HomeCharts.App/HomeCharts.App.csproj` ✅
+- `dotnet test HomeCharts.sln --no-build` ✅ (53 passing)
+
 ## 2026-03-05 — Documentation Reset + Dashboard/Category UX Updates
 
 ### Documentation

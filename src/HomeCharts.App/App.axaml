@@ -28,10 +28,20 @@
             <Setter Property="Foreground" Value="White"/>
         </Style>
         <Style Selector="Border.finance-income-swatch">
-            <Setter Property="Background" Value="#22C55E"/>
+            <Setter Property="Background">
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                    <GradientStop Color="#4ADE80" Offset="0"/>
+                    <GradientStop Color="#15803D" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter>
         </Style>
         <Style Selector="Border.finance-expense-swatch">
-            <Setter Property="Background" Value="#EF4444"/>
+            <Setter Property="Background">
+                <LinearGradientBrush StartPoint="0%,0%" EndPoint="0%,100%">
+                    <GradientStop Color="#FB7185" Offset="0"/>
+                    <GradientStop Color="#B91C1C" Offset="1"/>
+                </LinearGradientBrush>
+            </Setter>
         </Style>
         <Style Selector="Border.finance-accent-swatch">
             <Setter Property="Background" Value="#3B82F6"/>

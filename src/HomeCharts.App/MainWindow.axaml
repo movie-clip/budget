@@ -137,26 +137,35 @@
 
             <Grid Grid.Row="3" IsVisible="{Binding IsDashboardViewSelected}" ColumnDefinitions="1.45*,1.1*" ColumnSpacing="14">
                 <Grid RowDefinitions="Auto,Auto,*" RowSpacing="14">
-                    <Border Background="#111827" CornerRadius="18" BorderBrush="#1F2937" BorderThickness="1" Padding="18">
-                            <Grid RowDefinitions="Auto,*" RowSpacing="12">
+                    <Border Background="#111827" CornerRadius="18" BorderBrush="#1F2937" BorderThickness="1" Padding="20,18">
+                            <Grid RowDefinitions="Auto,*" RowSpacing="16">
                                 <Grid ColumnDefinitions="*,Auto">
-                                    <TextBlock Text="Cash Flow Trend" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
-                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                                        <TextBlock Text="{Binding TrendRangeText}" Foreground="#94A3B8" VerticalAlignment="Center"/>
-                                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                                            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                                <Border Classes="finance-income-swatch" Width="8" Height="8" CornerRadius="2" VerticalAlignment="Center"/>
-                                                <TextBlock Text="Income" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Center"/>
+                                    <StackPanel Spacing="3">
+                                        <TextBlock Text="Cash Flow Trend" Foreground="#F8FAFC" FontSize="19" FontWeight="Bold"/>
+                                        <TextBlock Text="Income vs. expenses, last 12 months" Foreground="#64748B" FontSize="12"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="18" VerticalAlignment="Center">
+                                        <Border Background="#0B1020" CornerRadius="8" Padding="10,5">
+                                            <TextBlock Text="{Binding TrendRangeText}" Foreground="#94A3B8" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <Border Classes="finance-income-swatch" Width="9" Height="9" CornerRadius="3" VerticalAlignment="Center"/>
+                                                <TextBlock Text="Income" Foreground="#94A3B8" FontSize="11" FontWeight="Medium" VerticalAlignment="Center"/>
                                             </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                                                <Border Classes="finance-expense-swatch" Width="8" Height="8" CornerRadius="2" VerticalAlignment="Center"/>
-                                                <TextBlock Text="Expenses" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Center"/>
+                                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <Border Classes="finance-expense-swatch" Width="9" Height="9" CornerRadius="3" VerticalAlignment="Center"/>
+                                                <TextBlock Text="Expenses" Foreground="#94A3B8" FontSize="11" FontWeight="Medium" VerticalAlignment="Center"/>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                <Border Classes="finance-accent-swatch" Width="9" Height="9" CornerRadius="3" VerticalAlignment="Center"/>
+                                                <TextBlock Text="Net" Foreground="#94A3B8" FontSize="11" FontWeight="Medium" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </StackPanel>
                                     </StackPanel>
                                 </Grid>
 
-                                <Grid Grid.Row="1" Margin="0,6,0,0">
+                                <Grid Grid.Row="1" Margin="0,4,0,0">
                                     <ItemsControl ItemsSource="{Binding TrendChartBars}" HorizontalAlignment="Stretch">
                                         <ItemsControl.ItemsPanel>
                                             <ItemsPanelTemplate>
@@ -165,12 +174,17 @@
                                         </ItemsControl.ItemsPanel>
                                         <ItemsControl.ItemTemplate>
                                             <DataTemplate x:DataType="mvp:DashboardTrendBarViewModel">
-                                                <Grid Margin="2,0,2,0" VerticalAlignment="Stretch">
-                                                    <Grid RowDefinitions="*,Auto" RowSpacing="8">
+                                                <Border x:Name="TrendCell" Margin="2,0,2,0" CornerRadius="10" Background="Transparent" Padding="0,8,0,6" VerticalAlignment="Stretch">
+                                                    <Border.Styles>
+                                                        <Style Selector="Border#TrendCell:pointerover">
+                                                            <Setter Property="Background" Value="#151E30"/>
+                                                        </Style>
+                                                    </Border.Styles>
+                                                    <Grid RowDefinitions="*,Auto,Auto" RowSpacing="6">
                                                         <Grid Height="250" VerticalAlignment="Bottom">
-                                                            <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="3" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Margin="0,0,0,4">
+                                                            <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="4" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Margin="0,0,0,4">
                                                                 <Border Classes="finance-income-swatch"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="6"
                                                                         Height="{Binding IncomeBarHeight}"
                                                                         Width="{Binding IncomeBarWidth}"
                                                                         VerticalAlignment="Bottom"
@@ -178,7 +192,7 @@
                                                                         ToolTip.Tip="{Binding IncomeTooltip}"/>
                                                                 <Border Grid.Column="1"
                                                                         Classes="finance-expense-swatch"
-                                                                        CornerRadius="4"
+                                                                        CornerRadius="6"
                                                                         Height="{Binding ExpensesBarHeight}"
                                                                         Width="{Binding ExpensesBarWidth}"
                                                                         VerticalAlignment="Bottom"
@@ -186,9 +200,25 @@
                                                                         ToolTip.Tip="{Binding ExpensesTooltip}"/>
                                                             </Grid>
                                                         </Grid>
-                                                        <TextBlock Grid.Row="1" Text="{Binding MonthLabel}" Foreground="#94A3B8" HorizontalAlignment="Center"/>
+                                                        <Grid Grid.Row="1">
+                                                            <TextBlock Text="{Binding NetSignedText}"
+                                                                       Classes="finance-income"
+                                                                       IsVisible="{Binding NetIsPositive}"
+                                                                       FontSize="10"
+                                                                       FontWeight="SemiBold"
+                                                                       HorizontalAlignment="Center"
+                                                                       ToolTip.Tip="{Binding NetTooltip}"/>
+                                                            <TextBlock Text="{Binding NetSignedText}"
+                                                                       Classes="finance-expense"
+                                                                       IsVisible="{Binding !NetIsPositive}"
+                                                                       FontSize="10"
+                                                                       FontWeight="SemiBold"
+                                                                       HorizontalAlignment="Center"
+                                                                       ToolTip.Tip="{Binding NetTooltip}"/>
+                                                        </Grid>
+                                                        <TextBlock Grid.Row="2" Text="{Binding MonthLabel}" Foreground="#94A3B8" FontSize="12" FontWeight="Medium" HorizontalAlignment="Center"/>
                                                     </Grid>
-                                                </Grid>
+                                                </Border>
                                             </DataTemplate>
                                         </ItemsControl.ItemTemplate>
                                     </ItemsControl>

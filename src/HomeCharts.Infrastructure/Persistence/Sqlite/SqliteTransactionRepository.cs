@@ -62,7 +62,7 @@ public sealed class SqliteTransactionRepository(IAppDbConnectionFactory connecti
             SELECT id, booking_date, value_date, description, normalized_description, transaction_fingerprint, amount, currency, source_account,
                    counterparty, external_reference, category_id, is_deleted, created_utc, updated_utc
             FROM transactions
-            WHERE booking_date >= $fromDate AND booking_date <= $toDate
+            WHERE booking_date >= $fromDate AND booking_date <= $toDate AND is_deleted = 0
             ORDER BY booking_date DESC, created_utc DESC;
             """;
 
