@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Tao33Z3pIOo=",
+  "dgSpecHash": "xgpOHVBcvNE=",
   "success": true,
-  "projectFilePath": "C:\\projects\\NET\\budget\\tests\\HomeCharts.Infrastructure.Tests\\HomeCharts.Infrastructure.Tests.csproj",
+  "projectFilePath": "C:\\projects\\investments\\budget\\tests\\HomeCharts.Infrastructure.Tests\\HomeCharts.Infrastructure.Tests.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\MovieClip\\.nuget\\packages\\microsoft.applicationinsights\\2.22.0\\microsoft.applicationinsights.2.22.0.nupkg.sha512",
     "C:\\Users\\MovieClip\\.nuget\\packages\\microsoft.codecoverage\\17.12.0\\microsoft.codecoverage.17.12.0.nupkg.sha512",

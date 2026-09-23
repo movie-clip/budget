@@ -40,8 +40,10 @@ Legacy WPF code is reference-only for behavior intent. Active implementation is 
 
 ### 4) Dashboard Review
 
-- KPI cards: income, expenses, uncategorized.
+- KPI cards: income, expenses, net, average monthly savings rate.
+- This-month-vs-last-month strip: current-month income/expenses/net alongside the signed delta from the previous month.
 - Monthly trend chart: income + expenses bars.
+- Needs Attention panel: the transactions still needing a category, with a count, categorized-coverage percentage, and total uncategorized amount, plus a "Review in Ledger" action that jumps to the Ledger tab filtered to uncategorized transactions.
 - Expenses panel:
   - shows all non-zero categories,
   - supports per-category expand/collapse,

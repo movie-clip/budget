@@ -40,7 +40,8 @@ SQLite DB path is under local app data (`HomeCharts` folder), with migrations ap
   - Auto-assigns `Income` category for positive transactions when no rule matches
 
 - `BuildDashboardSnapshotUseCase`
-  - Produces read-model for KPI, monthly trend, category breakdown, uncategorized queue
+  - Produces read-model for KPI, monthly trend, category breakdown, uncategorized queue, month-over-month comparison, coverage, largest expenses, and recurring expenses
+  - `MonthComparison` (current-vs-previous month deltas) and the uncategorized queue are consumed by the Dashboard UI (the month-comparison strip and the Needs Attention panel, respectively)
 
 ## 4. Deterministic Categorization
 

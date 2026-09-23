@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\projects\\NET\\budget\\tests\\HomeCharts.Application.Tests\\HomeCharts.Application.Tests.csproj": {}
+    "C:\\projects\\investments\\budget\\tests\\HomeCharts.Application.Tests\\HomeCharts.Application.Tests.csproj": {}
   },
   "projects": {
-    "C:\\projects\\NET\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj": {
+    "C:\\projects\\investments\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\projects\\NET\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj",
+        "projectUniqueName": "C:\\projects\\investments\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj",
         "projectName": "HomeCharts.Application",
-        "projectPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj",
+        "projectPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj",
         "packagesPath": "C:\\Users\\MovieClip\\.nuget\\packages\\",
-        "outputPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Application\\obj\\",
+        "outputPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Application\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -32,11 +32,11 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "C:\\projects\\NET\\budget\\src\\HomeCharts.Contracts\\HomeCharts.Contracts.csproj": {
-                "projectPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Contracts\\HomeCharts.Contracts.csproj"
+              "C:\\projects\\investments\\budget\\src\\HomeCharts.Contracts\\HomeCharts.Contracts.csproj": {
+                "projectPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Contracts\\HomeCharts.Contracts.csproj"
               },
-              "C:\\projects\\NET\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj": {
-                "projectPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj"
+              "C:\\projects\\investments\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj": {
+                "projectPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj"
               }
             }
           }
@@ -77,14 +77,14 @@
         }
       }
     },
-    "C:\\projects\\NET\\budget\\src\\HomeCharts.Contracts\\HomeCharts.Contracts.csproj": {
+    "C:\\projects\\investments\\budget\\src\\HomeCharts.Contracts\\HomeCharts.Contracts.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\projects\\NET\\budget\\src\\HomeCharts.Contracts\\HomeCharts.Contracts.csproj",
+        "projectUniqueName": "C:\\projects\\investments\\budget\\src\\HomeCharts.Contracts\\HomeCharts.Contracts.csproj",
         "projectName": "HomeCharts.Contracts",
-        "projectPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Contracts\\HomeCharts.Contracts.csproj",
+        "projectPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Contracts\\HomeCharts.Contracts.csproj",
         "packagesPath": "C:\\Users\\MovieClip\\.nuget\\packages\\",
-        "outputPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Contracts\\obj\\",
+        "outputPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Contracts\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -105,8 +105,8 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "C:\\projects\\NET\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj": {
-                "projectPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj"
+              "C:\\projects\\investments\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj": {
+                "projectPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj"
               }
             }
           }
@@ -147,14 +147,14 @@
         }
       }
     },
-    "C:\\projects\\NET\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj": {
+    "C:\\projects\\investments\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\projects\\NET\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj",
+        "projectUniqueName": "C:\\projects\\investments\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj",
         "projectName": "HomeCharts.Domain",
-        "projectPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj",
+        "projectPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Domain\\HomeCharts.Domain.csproj",
         "packagesPath": "C:\\Users\\MovieClip\\.nuget\\packages\\",
-        "outputPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Domain\\obj\\",
+        "outputPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -213,14 +213,14 @@
         }
       }
     },
-    "C:\\projects\\NET\\budget\\src\\HomeCharts.Presentation\\HomeCharts.Presentation.csproj": {
+    "C:\\projects\\investments\\budget\\src\\HomeCharts.Presentation\\HomeCharts.Presentation.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\projects\\NET\\budget\\src\\HomeCharts.Presentation\\HomeCharts.Presentation.csproj",
+        "projectUniqueName": "C:\\projects\\investments\\budget\\src\\HomeCharts.Presentation\\HomeCharts.Presentation.csproj",
         "projectName": "HomeCharts.Presentation",
-        "projectPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Presentation\\HomeCharts.Presentation.csproj",
+        "projectPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Presentation\\HomeCharts.Presentation.csproj",
         "packagesPath": "C:\\Users\\MovieClip\\.nuget\\packages\\",
-        "outputPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Presentation\\obj\\",
+        "outputPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Presentation\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -241,11 +241,11 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "C:\\projects\\NET\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj": {
-                "projectPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj"
+              "C:\\projects\\investments\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj": {
+                "projectPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj"
               },
-              "C:\\projects\\NET\\budget\\src\\HomeCharts.Contracts\\HomeCharts.Contracts.csproj": {
-                "projectPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Contracts\\HomeCharts.Contracts.csproj"
+              "C:\\projects\\investments\\budget\\src\\HomeCharts.Contracts\\HomeCharts.Contracts.csproj": {
+                "projectPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Contracts\\HomeCharts.Contracts.csproj"
               }
             }
           }
@@ -286,14 +286,14 @@
         }
       }
     },
-    "C:\\projects\\NET\\budget\\tests\\HomeCharts.Application.Tests\\HomeCharts.Application.Tests.csproj": {
+    "C:\\projects\\investments\\budget\\tests\\HomeCharts.Application.Tests\\HomeCharts.Application.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\projects\\NET\\budget\\tests\\HomeCharts.Application.Tests\\HomeCharts.Application.Tests.csproj",
+        "projectUniqueName": "C:\\projects\\investments\\budget\\tests\\HomeCharts.Application.Tests\\HomeCharts.Application.Tests.csproj",
         "projectName": "HomeCharts.Application.Tests",
-        "projectPath": "C:\\projects\\NET\\budget\\tests\\HomeCharts.Application.Tests\\HomeCharts.Application.Tests.csproj",
+        "projectPath": "C:\\projects\\investments\\budget\\tests\\HomeCharts.Application.Tests\\HomeCharts.Application.Tests.csproj",
         "packagesPath": "C:\\Users\\MovieClip\\.nuget\\packages\\",
-        "outputPath": "C:\\projects\\NET\\budget\\tests\\HomeCharts.Application.Tests\\obj\\",
+        "outputPath": "C:\\projects\\investments\\budget\\tests\\HomeCharts.Application.Tests\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -314,11 +314,11 @@
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "C:\\projects\\NET\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj": {
-                "projectPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj"
+              "C:\\projects\\investments\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj": {
+                "projectPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Application\\HomeCharts.Application.csproj"
               },
-              "C:\\projects\\NET\\budget\\src\\HomeCharts.Presentation\\HomeCharts.Presentation.csproj": {
-                "projectPath": "C:\\projects\\NET\\budget\\src\\HomeCharts.Presentation\\HomeCharts.Presentation.csproj"
+              "C:\\projects\\investments\\budget\\src\\HomeCharts.Presentation\\HomeCharts.Presentation.csproj": {
+                "projectPath": "C:\\projects\\investments\\budget\\src\\HomeCharts.Presentation\\HomeCharts.Presentation.csproj"
               }
             }
           }
