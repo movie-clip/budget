@@ -75,7 +75,7 @@
             </StackPanel>
         </Border>
 
-        <Grid Grid.Column="1" RowDefinitions="Auto,Auto,*" Margin="20" RowSpacing="16">
+        <Grid Grid.Column="1" RowDefinitions="Auto,Auto,Auto,*" Margin="20" RowSpacing="16">
                 <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center" IsVisible="{Binding IsDashboardViewSelected}">
                     <StackPanel Spacing="4">
                         <TextBlock Text="Budget Overview" FontSize="28" FontWeight="Bold" Foreground="#F8FAFC"/>
@@ -113,7 +113,29 @@
                 </Border>
             </Grid>
 
-            <Grid Grid.Row="2" IsVisible="{Binding IsDashboardViewSelected}" ColumnDefinitions="1.45*,1.1*" ColumnSpacing="14">
+            <Border Grid.Row="2" IsVisible="{Binding IsDashboardViewSelected}" Background="#111827" CornerRadius="18" Padding="16,14" BorderBrush="#1F2937" BorderThickness="1">
+                <Grid RowDefinitions="Auto,Auto" RowSpacing="8">
+                    <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" ColumnSpacing="24" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding CurrentMonthLabelText}" Foreground="#F8FAFC" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="vs last month" Foreground="#64748B" FontSize="12" VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="Income" Classes="finance-income" FontSize="12" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding CurrentMonthIncomeText, StringFormat='€{0}'}" Foreground="#F8FAFC" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="Expenses" Classes="finance-expense" FontSize="12" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding CurrentMonthExpensesText, StringFormat='€{0}'}" Foreground="#F8FAFC" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                            <TextBlock Text="Net" Classes="finance-accent" FontSize="12" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding CurrentMonthNetText, StringFormat='€{0}'}" Foreground="#F8FAFC" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock Grid.Row="1" Text="{Binding MonthDeltaSummaryText}" Foreground="#94A3B8" FontSize="12"/>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Row="3" IsVisible="{Binding IsDashboardViewSelected}" ColumnDefinitions="1.45*,1.1*" ColumnSpacing="14">
                 <Grid RowDefinitions="Auto,Auto,*" RowSpacing="14">
                     <Border Background="#111827" CornerRadius="18" BorderBrush="#1F2937" BorderThickness="1" Padding="18">
                             <Grid RowDefinitions="Auto,*" RowSpacing="12">
@@ -228,7 +250,47 @@
                     </Grid>
                 </Grid>
 
-                <Border Grid.Column="1" Background="#111827" CornerRadius="18" BorderBrush="#1F2937" BorderThickness="1" Padding="18">
+                <Grid Grid.Column="1" RowDefinitions="Auto,*" RowSpacing="14">
+                    <Border Background="#111827" CornerRadius="18" BorderBrush="#1F2937" BorderThickness="1" Padding="18">
+                        <Grid RowDefinitions="Auto,Auto,Auto,*" RowSpacing="10">
+                            <Grid ColumnDefinitions="*,Auto">
+                                <TextBlock Text="Needs Attention" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
+                                <Button Grid.Column="1" Content="Review in Ledger" Command="{Binding ReviewUncategorizedCommand}" Classes="finance-primary" Padding="10,6" FontSize="12"/>
+                            </Grid>
+                            <Grid Grid.Row="1" ColumnDefinitions="*,*,*" ColumnSpacing="10">
+                                <StackPanel Spacing="2">
+                                    <TextBlock Text="Uncategorized" Foreground="#94A3B8" FontSize="11"/>
+                                    <TextBlock Text="{Binding UncategorizedCountText}" Classes="finance-warning" FontWeight="SemiBold"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="2">
+                                    <TextBlock Text="Coverage" Foreground="#94A3B8" FontSize="11"/>
+                                    <TextBlock Text="{Binding CategorizedCoverageText}" Foreground="#F8FAFC" FontWeight="SemiBold"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Spacing="2">
+                                    <TextBlock Text="Amount" Foreground="#94A3B8" FontSize="11"/>
+                                    <TextBlock Text="{Binding UncategorizedAmountText, StringFormat='€{0}'}" Classes="finance-warning" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock Grid.Row="2" Text="Most recent uncategorized transactions" Foreground="#94A3B8" FontSize="12"/>
+                            <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" MaxHeight="220">
+                                <ItemsControl ItemsSource="{Binding UncategorizedRows}">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="mvp:DashboardUncategorizedRowViewModel">
+                                            <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10" Padding="10" Margin="0,0,0,6">
+                                                <Grid ColumnDefinitions="90,*,90" ColumnSpacing="8">
+                                                    <TextBlock Text="{Binding Date}" Foreground="#94A3B8" FontSize="11" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Description}" Foreground="#CBD5E1" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"/>
+                                                    <TextBlock Grid.Column="2" Text="{Binding AmountText, StringFormat='€{0}'}" Foreground="#CBD5E1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
+                        </Grid>
+                    </Border>
+
+                    <Border Grid.Row="1" Background="#111827" CornerRadius="18" BorderBrush="#1F2937" BorderThickness="1" Padding="18">
                     <Grid RowDefinitions="Auto,Auto,*" RowSpacing="10">
                             <TextBlock Text="Expenses" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
                             <TextBlock Grid.Row="1" Text="Category distribution" Foreground="#94A3B8"/>
@@ -290,7 +352,8 @@
                                 </ItemsControl>
                             </ScrollViewer>
                         </Grid>
-                </Border>
+                    </Border>
+                </Grid>
             </Grid>
             <Border Background="#111827" CornerRadius="14" BorderBrush="#1F2937" BorderThickness="1" Padding="18" IsVisible="{Binding IsImportFiltersViewSelected}">
                 <Grid RowDefinitions="Auto,*" RowSpacing="14">

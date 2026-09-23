@@ -78,9 +78,8 @@ public sealed class MainWindowViewModel : ObservableObject
     private string _rulesQueuePageInfo = "Page 1/1";
     private string _parsedCategoriesSummary = "Expenses: 0";
     private string _pageInfo = "Page 1";
-    private string _dashboardSummary = "Dashboard not loaded";
     private string _trendRangeText = "Last 12 months";
-    private string _totalTransactionsText = "0";
+    private int _totalTransactionsCount;
     private string _incomeText = "0.00";
     private string _expensesText = "0.00";
     private string _netText = "0.00";
@@ -93,9 +92,6 @@ public sealed class MainWindowViewModel : ObservableObject
     private string _uncategorizedCountText = "0";
     private string _categorizedCoverageText = "0.00%";
     private string _uncategorizedAmountText = "0.00";
-    private string _attentionSummaryText = "No dashboard actions pending";
-    private double _incomeBarPercent;
-    private double _expensesBarPercent;
     private string _selectedView = "Dashboard";
     private bool _isBusy;
     private int _currentPage = 1;
@@ -169,6 +165,7 @@ public sealed class MainWindowViewModel : ObservableObject
         ExportCommand = new DelegateCommand(() => _ = ExportAsync(), () => !IsBusy);
         ImportPackageCommand = new DelegateCommand(() => _ = ImportPackageAsync(), () => !IsBusy);
         ApplyFiltersCommand = new DelegateCommand(() => _ = ApplyFiltersAsync(), () => !IsBusy);
+        ReviewUncategorizedCommand = new DelegateCommand(() => _ = ReviewUncategorizedAsync(), () => !IsBusy);
         RefreshRulesQueueCommand = new DelegateCommand(() => _ = RefreshRulesQueueAsync(), () => !IsBusy);
         NextRulesQueuePageCommand = new DelegateCommand(() => MoveNextRulesQueuePage(), () => !IsBusy && CanMoveNextRulesQueuePage());
         PreviousRulesQueuePageCommand = new DelegateCommand(() => MovePreviousRulesQueuePage(), () => !IsBusy && _rulesQueueCurrentPage > 1);
@@ -201,9 +198,7 @@ public sealed class MainWindowViewModel : ObservableObject
     public ObservableCollection<LedgerRowViewModel> LedgerItems { get; } = [];
     public ObservableCollection<CategoryOptionViewModel> Categories { get; } = [];
     public ObservableCollection<CategoryOptionViewModel> ExpenseCategories { get; } = [];
-    public ObservableCollection<DashboardTrendRowViewModel> TrendRows { get; } = [];
     public ObservableCollection<DashboardTrendBarViewModel> TrendChartBars { get; } = [];
-    public ObservableCollection<DashboardCategoryRowViewModel> CategoryRows { get; } = [];
     public ObservableCollection<DashboardExpenseCategoryBarViewModel> ExpenseCategoryBars { get; } = [];
     public ObservableCollection<DashboardUncategorizedRowViewModel> UncategorizedRows { get; } = [];
     public ObservableCollection<DashboardLargestExpenseViewModel> LargestExpenseRows { get; } = [];
@@ -232,6 +227,7 @@ public sealed class MainWindowViewModel : ObservableObject
     public ICommand ExportCommand { get; }
     public ICommand ImportPackageCommand { get; }
     public ICommand ApplyFiltersCommand { get; }
+    public ICommand ReviewUncategorizedCommand { get; }
     public ICommand RefreshRulesQueueCommand { get; }
     public ICommand NextRulesQueuePageCommand { get; }
     public ICommand PreviousRulesQueuePageCommand { get; }
@@ -415,22 +411,10 @@ public sealed class MainWindowViewModel : ObservableObject
         private set => SetProperty(ref _pageInfo, value);
     }
 
-    public string DashboardSummary
-    {
-        get => _dashboardSummary;
-        private set => SetProperty(ref _dashboardSummary, value);
-    }
-
     public string TrendRangeText
     {
         get => _trendRangeText;
         private set => SetProperty(ref _trendRangeText, value);
-    }
-
-    public string TotalTransactionsText
-    {
-        get => _totalTransactionsText;
-        private set => SetProperty(ref _totalTransactionsText, value);
     }
 
     public string IncomeText
@@ -503,24 +487,6 @@ public sealed class MainWindowViewModel : ObservableObject
     {
         get => _uncategorizedAmountText;
         private set => SetProperty(ref _uncategorizedAmountText, value);
-    }
-
-    public string AttentionSummaryText
-    {
-        get => _attentionSummaryText;
-        private set => SetProperty(ref _attentionSummaryText, value);
-    }
-
-    public double IncomeBarPercent
-    {
-        get => _incomeBarPercent;
-        private set => SetProperty(ref _incomeBarPercent, value);
-    }
-
-    public double ExpensesBarPercent
-    {
-        get => _expensesBarPercent;
-        private set => SetProperty(ref _expensesBarPercent, value);
     }
 
     public string BackupFilePath
@@ -740,7 +706,7 @@ public sealed class MainWindowViewModel : ObservableObject
                 await RefreshDashboardAsync();
                 Status =
                     $"Merge skipped for {result.SourceName}: duplicate file hash. " +
-                    $"Budget transactions in DB range: {TotalTransactionsText}.";
+                    $"Budget transactions in DB range: {_totalTransactionsCount}.";
                 SetSelectedView("Dashboard");
                 return;
             }
@@ -765,7 +731,7 @@ public sealed class MainWindowViewModel : ObservableObject
             Status =
                 $"Merged {result.Metrics.ImportedRowCount}/{result.MatchedCount} matched rows from {result.SourceName} into budget. " +
                 $"Unmatched: {result.UnmatchedCount}, Skipped duplicates: {result.SkippedDuplicateRowCount}, " +
-                $"Budget transactions in DB range: {TotalTransactionsText}.";
+                $"Budget transactions in DB range: {_totalTransactionsCount}.";
             SetSelectedView("Dashboard");
             RaiseCommands();
         });
@@ -809,6 +775,18 @@ public sealed class MainWindowViewModel : ObservableObject
             _currentPage = 1;
             await RefreshLedgerAsync();
             Status = $"Filters applied. Matched {_totalMatchedCount} rows.";
+        });
+    }
+
+    private async Task ReviewUncategorizedAsync()
+    {
+        await RunBusyAsync(async () =>
+        {
+            OnlyUncategorized = true;
+            _currentPage = 1;
+            await RefreshLedgerAsync();
+            SetSelectedView("Ledger");
+            Status = $"Showing uncategorized transactions. Matched {_totalMatchedCount} rows.";
         });
     }
 
@@ -1164,10 +1142,7 @@ public sealed class MainWindowViewModel : ObservableObject
         var range = GetDefaultRange();
         var snapshot = await _buildDashboardSnapshotUseCase.ExecuteAsync(range.From, range.To, trendMonths: 12, uncategorizedLimit: 12);
 
-        DashboardSummary =
-            $"Tx: {snapshot.Kpi.TotalTransactions} • Income: {snapshot.Kpi.TotalIncome:0.00} • Expenses: {snapshot.Kpi.TotalExpenses:0.00} • Net: {snapshot.Kpi.NetAmount:0.00} • Savings: {snapshot.Kpi.SavingsRatePercent:0.00}% • Categorized: {snapshot.Coverage.CategorizedPercent:0.00}% • Uncategorized: {snapshot.Kpi.UncategorizedCount}";
-
-        TotalTransactionsText = snapshot.Kpi.TotalTransactions.ToString();
+        _totalTransactionsCount = snapshot.Kpi.TotalTransactions;
         IncomeText = snapshot.Kpi.TotalIncome.ToString("0.00");
         ExpensesText = snapshot.Kpi.TotalExpenses.ToString("0.00");
         NetText = snapshot.Kpi.NetAmount.ToString("0.00");
@@ -1179,22 +1154,8 @@ public sealed class MainWindowViewModel : ObservableObject
         CurrentMonthIncomeText = snapshot.CurrentVsPreviousMonth.Current.Income.ToString("0.00");
         CurrentMonthExpensesText = snapshot.CurrentVsPreviousMonth.Current.Expenses.ToString("0.00");
         CurrentMonthNetText = snapshot.CurrentVsPreviousMonth.Current.Net.ToString("0.00");
-        MonthDeltaSummaryText = string.Empty;
-        AttentionSummaryText = string.Empty;
+        MonthDeltaSummaryText = FormatMonthDeltaSummary(snapshot.CurrentVsPreviousMonth);
 
-        var totalFlow = Math.Abs(snapshot.Kpi.TotalIncome) + Math.Abs(snapshot.Kpi.TotalExpenses);
-        if (totalFlow <= 0)
-        {
-            IncomeBarPercent = 0;
-            ExpensesBarPercent = 0;
-        }
-        else
-        {
-            IncomeBarPercent = Math.Round((double)(Math.Abs(snapshot.Kpi.TotalIncome) / totalFlow * 100m), 2);
-            ExpensesBarPercent = Math.Round((double)(Math.Abs(snapshot.Kpi.TotalExpenses) / totalFlow * 100m), 2);
-        }
-
-        TrendRows.Clear();
         TrendChartBars.Clear();
 
         if (snapshot.MonthlyTrend.Count > 0)
@@ -1213,12 +1174,6 @@ public sealed class MainWindowViewModel : ObservableObject
 
         foreach (var point in snapshot.MonthlyTrend)
         {
-            TrendRows.Add(new DashboardTrendRowViewModel(
-                point.Month.ToString("yyyy-MM"),
-                point.Income,
-                point.Expenses,
-                point.Net));
-
             var incomePercent = maxIncome <= 0m
                 ? 0d
                 : Math.Round((double)(Math.Abs(point.Income) / maxIncome * 100m), 2);
@@ -1236,7 +1191,6 @@ public sealed class MainWindowViewModel : ObservableObject
                 expensesPercent));
         }
 
-        CategoryRows.Clear();
         ExpenseCategoryBars.Clear();
 
         var maxCategoryAmount = snapshot.CategoryBreakdown.Any()
@@ -1245,11 +1199,6 @@ public sealed class MainWindowViewModel : ObservableObject
 
         foreach (var category in snapshot.CategoryBreakdown)
         {
-            CategoryRows.Add(new DashboardCategoryRowViewModel(
-                category.CategoryName,
-                category.Amount,
-                category.TransactionCount));
-
             var percent = maxCategoryAmount <= 0m
                 ? 0d
                 : Math.Round((double)(category.Amount / maxCategoryAmount * 100m), 2);
@@ -1485,6 +1434,16 @@ public sealed class MainWindowViewModel : ObservableObject
     {
         var today = DateOnly.FromDateTime(DateTime.Today);
         return (today.AddYears(-5), today.AddDays(1));
+    }
+
+    private static string FormatMonthDeltaSummary(MonthComparison comparison)
+    {
+        return $"Income {FormatSignedAmount(comparison.IncomeDelta)} • Expenses {FormatSignedAmount(comparison.ExpensesDelta)} • Net {FormatSignedAmount(comparison.NetDelta)} vs last month";
+    }
+
+    private static string FormatSignedAmount(decimal value)
+    {
+        return value >= 0m ? $"+{value:0.00}" : value.ToString("0.00");
     }
 
     private (DateOnly From, DateOnly To) ResolveLedgerDateRange()

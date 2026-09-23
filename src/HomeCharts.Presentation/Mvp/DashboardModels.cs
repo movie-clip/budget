@@ -2,18 +2,6 @@ using System.Globalization;
 
 namespace HomeCharts.Presentation.Mvp;
 
-public sealed record DashboardTrendRowViewModel(string Month, decimal Income, decimal Expenses, decimal Net)
-{
-    public string IncomeText => Income.ToString("0.00");
-    public string ExpensesText => Expenses.ToString("0.00");
-    public string NetText => Net.ToString("0.00");
-}
-
-public sealed record DashboardCategoryRowViewModel(string Category, decimal Amount, int Transactions)
-{
-    public string AmountText => Amount.ToString("0.00");
-}
-
 public sealed record DashboardUncategorizedRowViewModel(Guid TransactionId, string Date, string Description, decimal Amount)
 {
     public string AmountText => Amount.ToString("0.00");
