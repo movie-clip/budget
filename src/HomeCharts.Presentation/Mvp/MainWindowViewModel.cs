@@ -1,48 +1,25 @@
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Globalization;
 using System.Windows.Input;
 using HomeCharts.Application.Import;
 using HomeCharts.Application.UseCases;
+using HomeCharts.Domain.Categorization;
+using HomeCharts.Domain.Model;
 
 namespace HomeCharts.Presentation.Mvp;
 
 public sealed class MainWindowViewModel : ObservableObject
 {
     private const string DefaultCardPrefix = "COMPRA TARJ. 5402XXXXXXXX7020";
-    private static readonly string[] ExpenseCategoryOrder =
-    [
-        "None",
-        "Cafe",
-        "Shopping",
-        "Grocery",
-        "Education",
-        "Car",
-        "Entertainment",
-        "House",
-        "Medicine",
-        "Rent",
-        "Utility",
-        "Smoke",
-        "Travel",
-        "Transport",
-        "Services",
-        "Income",
-        "Transfer",
-        "Others"
-    ];
     private readonly InitializeDatabaseUseCase _initializeDatabaseUseCase;
     private readonly SeedDefaultCategoriesUseCase _seedDefaultCategoriesUseCase;
     private readonly ImportBankStatementUseCase _importBankStatementUseCase;
     private readonly PreviewMatchedTransactionsUseCase _previewMatchedTransactionsUseCase;
     private readonly MergeMatchedTransactionsUseCase _mergeMatchedTransactionsUseCase;
     private readonly ApplyCategorizationRulesUseCase _applyCategorizationRulesUseCase;
-    private readonly PreviewPotentialRulesUseCase _previewPotentialRulesUseCase;
     private readonly PreviewParsedCategoryExpensesUseCase _previewParsedCategoryExpensesUseCase;
     private readonly DeleteAllRulesUseCase _deleteAllRulesUseCase;
     private readonly DeleteAllTransactionsUseCase _deleteAllTransactionsUseCase;
-    private readonly CreateCategorizationRuleUseCase _createCategorizationRuleUseCase;
-    private readonly CreateCategorizationRulesBatchUseCase _createCategorizationRulesBatchUseCase;
     private readonly GetLedgerEntriesUseCase _getLedgerEntriesUseCase;
     private readonly BuildDashboardSnapshotUseCase _buildDashboardSnapshotUseCase;
     private readonly GetCategoriesUseCase _getCategoriesUseCase;
@@ -74,8 +51,6 @@ public sealed class MainWindowViewModel : ObservableObject
     private string _lastImportWarningBreakdown = "Warnings: 0";
     private string _matchedTransactionsSummary = "Matched transactions: 0";
     private string _newPrefixFilter = "COMPRA TARJ. 5402XXXXXXXX7020";
-    private string _rulesQueueSummary = "Potential new rules: 0";
-    private string _rulesQueuePageInfo = "Page 1/1";
     private string _parsedCategoriesSummary = "Expenses: 0";
     private string _pageInfo = "Page 1";
     private string _trendRangeText = "Last 12 months";
@@ -98,11 +73,7 @@ public sealed class MainWindowViewModel : ObservableObject
     private int _totalMatchedCount;
     private string? _stagedMatchedFileContent;
     private string? _stagedMatchedSourceName;
-    private int _rulesQueueCurrentPage = 1;
-    private int _rulesQueueTotalMatchedCount;
-    private readonly List<PotentialRuleRow> _rulesQueueRows = [];
     private const int PageSize = 200;
-    private const int RulesQueuePageSize = 120;
     private LedgerRowViewModel? _selectedLedgerItem;
     private CategoryOptionViewModel? _selectedCategory;
     private TransactionDetailViewModel? _selectedTransactionDetail;
@@ -119,8 +90,7 @@ public sealed class MainWindowViewModel : ObservableObject
         PreviewParsedCategoryExpensesUseCase previewParsedCategoryExpensesUseCase,
         DeleteAllRulesUseCase deleteAllRulesUseCase,
         DeleteAllTransactionsUseCase deleteAllTransactionsUseCase,
-        CreateCategorizationRuleUseCase createCategorizationRuleUseCase,
-        CreateCategorizationRulesBatchUseCase createCategorizationRulesBatchUseCase,
+        ApplyPotentialRulesUseCase applyPotentialRulesUseCase,
         GetLedgerEntriesUseCase getLedgerEntriesUseCase,
         BuildDashboardSnapshotUseCase buildDashboardSnapshotUseCase,
         GetCategoriesUseCase getCategoriesUseCase,
@@ -139,12 +109,9 @@ public sealed class MainWindowViewModel : ObservableObject
         _previewMatchedTransactionsUseCase = previewMatchedTransactionsUseCase;
         _mergeMatchedTransactionsUseCase = mergeMatchedTransactionsUseCase;
         _applyCategorizationRulesUseCase = applyCategorizationRulesUseCase;
-        _previewPotentialRulesUseCase = previewPotentialRulesUseCase;
         _previewParsedCategoryExpensesUseCase = previewParsedCategoryExpensesUseCase;
         _deleteAllRulesUseCase = deleteAllRulesUseCase;
         _deleteAllTransactionsUseCase = deleteAllTransactionsUseCase;
-        _createCategorizationRuleUseCase = createCategorizationRuleUseCase;
-        _createCategorizationRulesBatchUseCase = createCategorizationRulesBatchUseCase;
         _getLedgerEntriesUseCase = getLedgerEntriesUseCase;
         _buildDashboardSnapshotUseCase = buildDashboardSnapshotUseCase;
         _getCategoriesUseCase = getCategoriesUseCase;
@@ -157,6 +124,17 @@ public sealed class MainWindowViewModel : ObservableObject
         _exportDataPackageUseCase = exportDataPackageUseCase;
         _importDataPackageUseCase = importDataPackageUseCase;
 
+        PotentialRules = new PotentialRulesViewModel(
+            previewPotentialRulesUseCase,
+            applyPotentialRulesUseCase,
+            ExpenseCategories,
+            new PotentialRulesHost(
+                () => ImportFilePath,
+                () => IsBusy,
+                RunBusyAsync,
+                message => Status = message,
+                () => RefreshParsedCategoryExpensesAsync()));
+
         ImportCommand = new DelegateCommand(() => _ = ImportAsync(), () => !IsBusy);
         ApplyRulesCommand = new DelegateCommand(() => _ = ApplyRulesAsync(), () => !IsBusy);
         RefreshCommand = new DelegateCommand(() => _ = RefreshAsync(), () => !IsBusy);
@@ -166,18 +144,9 @@ public sealed class MainWindowViewModel : ObservableObject
         ImportPackageCommand = new DelegateCommand(() => _ = ImportPackageAsync(), () => !IsBusy);
         ApplyFiltersCommand = new DelegateCommand(() => _ = ApplyFiltersAsync(), () => !IsBusy);
         ReviewUncategorizedCommand = new DelegateCommand(() => _ = ReviewUncategorizedAsync(), () => !IsBusy);
-        RefreshRulesQueueCommand = new DelegateCommand(() => _ = RefreshRulesQueueAsync(), () => !IsBusy);
-        NextRulesQueuePageCommand = new DelegateCommand(() => MoveNextRulesQueuePage(), () => !IsBusy && CanMoveNextRulesQueuePage());
-        PreviousRulesQueuePageCommand = new DelegateCommand(() => MovePreviousRulesQueuePage(), () => !IsBusy && _rulesQueueCurrentPage > 1);
         ClearAllRulesCommand = new DelegateCommand(() => _ = ClearAllRulesAsync(), () => !IsBusy);
         ClearAllTransactionsCommand = new DelegateCommand(() => _ = ClearAllTransactionsAsync(), () => !IsBusy);
         MergeMatchedTransactionsCommand = new DelegateCommand(() => _ = MergeMatchedTransactionsAsync(), () => !IsBusy && CanMergeMatchedTransactions());
-        SavePotentialRuleCommand = new DelegateCommand<EditableRulesImportedTransactionViewModel>(
-            row => _ = SavePotentialRuleAsync(row),
-            row => !IsBusy && row is not null);
-        SaveAllPotentialRulesCommand = new DelegateCommand(
-            () => _ = SaveAllPotentialRulesAsync(),
-            () => !IsBusy && ImportedRuleTransactions.Any(static row => row.IsModified && row.SelectedCategory is not null));
         AddPrefixFilterCommand = new DelegateCommand(() => _ = AddPrefixFilterAsync(), () => !IsBusy && !string.IsNullOrWhiteSpace(NewPrefixFilter));
         RemovePrefixFilterCommand = new DelegateCommand<PrefixFilterItemViewModel>(
             item => _ = RemovePrefixFilterAsync(item),
@@ -198,12 +167,12 @@ public sealed class MainWindowViewModel : ObservableObject
     public ObservableCollection<LedgerRowViewModel> LedgerItems { get; } = [];
     public ObservableCollection<CategoryOptionViewModel> Categories { get; } = [];
     public ObservableCollection<CategoryOptionViewModel> ExpenseCategories { get; } = [];
+    public PotentialRulesViewModel PotentialRules { get; }
     public ObservableCollection<DashboardTrendBarViewModel> TrendChartBars { get; } = [];
     public ObservableCollection<DashboardExpenseCategoryBarViewModel> ExpenseCategoryBars { get; } = [];
     public ObservableCollection<DashboardUncategorizedRowViewModel> UncategorizedRows { get; } = [];
     public ObservableCollection<DashboardLargestExpenseViewModel> LargestExpenseRows { get; } = [];
     public ObservableCollection<DashboardRecurringExpenseViewModel> RecurringExpenseRows { get; } = [];
-    public ObservableCollection<EditableRulesImportedTransactionViewModel> ImportedRuleTransactions { get; } = [];
     public ObservableCollection<MatchedImportedTransactionViewModel> MatchedImportTransactions { get; } = [];
     public ObservableCollection<ParsedCategoryExpenseViewModel> ParsedCategoryExpenses { get; } = [];
     public ObservableCollection<PrefixFilterItemViewModel> PrefixFilters { get; } = [];
@@ -228,14 +197,9 @@ public sealed class MainWindowViewModel : ObservableObject
     public ICommand ImportPackageCommand { get; }
     public ICommand ApplyFiltersCommand { get; }
     public ICommand ReviewUncategorizedCommand { get; }
-    public ICommand RefreshRulesQueueCommand { get; }
-    public ICommand NextRulesQueuePageCommand { get; }
-    public ICommand PreviousRulesQueuePageCommand { get; }
     public ICommand ClearAllRulesCommand { get; }
     public ICommand ClearAllTransactionsCommand { get; }
     public ICommand MergeMatchedTransactionsCommand { get; }
-    public ICommand SavePotentialRuleCommand { get; }
-    public ICommand SaveAllPotentialRulesCommand { get; }
     public ICommand AddPrefixFilterCommand { get; }
     public ICommand RemovePrefixFilterCommand { get; }
     public ICommand ResetTransactionFiltersCommand { get; }
@@ -300,18 +264,6 @@ public sealed class MainWindowViewModel : ObservableObject
 
             RaiseCommands();
         }
-    }
-
-    public string RulesQueueSummary
-    {
-        get => _rulesQueueSummary;
-        private set => SetProperty(ref _rulesQueueSummary, value);
-    }
-
-    public string RulesQueuePageInfo
-    {
-        get => _rulesQueuePageInfo;
-        private set => SetProperty(ref _rulesQueuePageInfo, value);
     }
 
     public string ParsedCategoriesSummary
@@ -596,7 +548,7 @@ public sealed class MainWindowViewModel : ObservableObject
                 LastImportSummary = $"Duplicate import skipped for {result.SourceName}.";
                 LastImportDetails = $"File hash: {result.FileHash}";
                 await RefreshLedgerAsync();
-                await RefreshRulesQueueAsync(content);
+                await PotentialRules.RefreshAsync(content);
                 await RefreshParsedCategoryExpensesAsync(content);
                 return;
             }
@@ -618,7 +570,7 @@ public sealed class MainWindowViewModel : ObservableObject
             var applyResult = await _applyCategorizationRulesUseCase.ExecuteAsync(range.From, range.To);
 
             await RefreshDashboardAsync();
-            await RefreshRulesQueueAsync(content);
+            await PotentialRules.RefreshAsync(content);
             await RefreshParsedCategoryExpensesAsync(content);
             Status = $"Imported {result.ImportedCount}/{result.Metrics.ParsedRowCount} rows from {sourceName}. Skipped duplicates: {result.SkippedDuplicateRowCount}.{warningSuffix} Auto-categorized: {applyResult.CategorizedCount}.";
             LastImportSummary = $"Imported {result.ImportedCount}/{result.Metrics.ParsedRowCount} rows from {result.SourceName}.";
@@ -720,7 +672,7 @@ public sealed class MainWindowViewModel : ObservableObject
             _currentPage = 1;
             await RefreshLedgerAsync();
             await RefreshDashboardAsync();
-            await RefreshRulesQueueAsync(_stagedMatchedFileContent);
+            await PotentialRules.RefreshAsync(_stagedMatchedFileContent);
             await RefreshParsedCategoryExpensesAsync(_stagedMatchedFileContent);
 
             MatchedImportTransactions.Clear();
@@ -745,7 +697,7 @@ public sealed class MainWindowViewModel : ObservableObject
             var result = await _applyCategorizationRulesUseCase.ExecuteAsync(range.From, range.To);
             await RefreshLedgerAsync();
             await RefreshDashboardAsync();
-            await RefreshRulesQueueAsync();
+            await PotentialRules.RefreshAsync();
             await RefreshParsedCategoryExpensesAsync();
             Status = $"Rules applied. Categorized: {result.CategorizedCount}, Manual skips: {result.SkippedByManualOverrideCount}, No match: {result.NoMatchCount}.";
         });
@@ -762,7 +714,7 @@ public sealed class MainWindowViewModel : ObservableObject
             _currentPage = 1;
             await RefreshLedgerAsync();
             await RefreshDashboardAsync();
-            await RefreshRulesQueueAsync();
+            await PotentialRules.RefreshAsync();
             await RefreshParsedCategoryExpensesAsync();
             Status = $"Ledger refreshed. Items: {LedgerItems.Count}.";
         });
@@ -795,7 +747,7 @@ public sealed class MainWindowViewModel : ObservableObject
         await RunBusyAsync(async () =>
         {
             var result = await _deleteAllRulesUseCase.ExecuteAsync();
-            await RefreshRulesQueueAsync();
+            await PotentialRules.RefreshAsync();
             await RefreshParsedCategoryExpensesAsync();
             Status = $"All rules deleted. Removed: {result.DeletedCount}.";
         });
@@ -837,62 +789,6 @@ public sealed class MainWindowViewModel : ObservableObject
         });
     }
 
-    private async Task SavePotentialRuleAsync(EditableRulesImportedTransactionViewModel? row)
-    {
-        if (row is null)
-        {
-            return;
-        }
-
-        await RunBusyAsync(async () =>
-        {
-            if (row.SelectedCategory is null)
-            {
-                Status = "Select a category before saving a rule.";
-                return;
-            }
-
-            var result = await _createCategorizationRuleUseCase.ExecuteAsync(row.Description, row.SelectedCategory.Id);
-            if (result.IsInvalidInput)
-            {
-                Status = "Description is empty. Enter a matching string first.";
-                return;
-            }
-
-            if (result.IsCreated)
-            {
-                await RefreshRulesQueueAsync();
-                await RefreshParsedCategoryExpensesAsync();
-                Status = $"Rule saved for '{row.Description.Trim()}'.";
-                return;
-            }
-
-            Status = "Matching rule already exists.";
-        });
-    }
-
-    private async Task SaveAllPotentialRulesAsync()
-    {
-        await RunBusyAsync(async () =>
-        {
-            var modifiedRows = ImportedRuleTransactions
-                .Where(static row => row.IsModified && row.SelectedCategory is not null)
-                .Select(static row => new CreateCategorizationRulesBatchItem(row.Description, row.SelectedCategory!.Id))
-                .ToArray();
-
-            if (modifiedRows.Length == 0)
-            {
-                Status = "Modify at least one row before applying all rules.";
-                return;
-            }
-
-            var result = await _createCategorizationRulesBatchUseCase.ExecuteAsync(modifiedRows);
-            await RefreshRulesQueueAsync();
-            await RefreshParsedCategoryExpensesAsync();
-            Status = $"Apply all complete. Created: {result.CreatedCount}, duplicates: {result.DuplicateCount}, invalid: {result.InvalidCount}.";
-        });
-    }
-
     private async Task AddPrefixFilterAsync()
     {
         await RunBusyAsync(async () =>
@@ -906,7 +802,7 @@ public sealed class MainWindowViewModel : ObservableObject
 
             await ReloadPrefixFiltersAsync();
             await RefreshLedgerAsync();
-            await RefreshRulesQueueAsync();
+            await PotentialRules.RefreshAsync();
             Status = "Prefix filter saved.";
         });
     }
@@ -929,7 +825,7 @@ public sealed class MainWindowViewModel : ObservableObject
 
             await ReloadPrefixFiltersAsync();
             await RefreshLedgerAsync();
-            await RefreshRulesQueueAsync();
+            await PotentialRules.RefreshAsync();
             Status = "Prefix filter removed.";
         });
     }
@@ -951,7 +847,7 @@ public sealed class MainWindowViewModel : ObservableObject
             await ReloadPrefixFiltersAsync();
             await RefreshLedgerAsync();
             await RefreshDashboardAsync();
-            await RefreshRulesQueueAsync();
+            await PotentialRules.RefreshAsync();
             await RefreshParsedCategoryExpensesAsync();
             Status = $"Database restored from: {result.SourceBackupPath}";
         });
@@ -975,7 +871,7 @@ public sealed class MainWindowViewModel : ObservableObject
             await ReloadPrefixFiltersAsync();
             await RefreshLedgerAsync();
             await RefreshDashboardAsync();
-            await RefreshRulesQueueAsync();
+            await PotentialRules.RefreshAsync();
             await RefreshParsedCategoryExpensesAsync();
             Status = $"Import complete: tx={result.ImportedTransactions}, categories={result.ImportedCategories}, rules={result.ImportedRules}";
         });
@@ -1040,15 +936,9 @@ public sealed class MainWindowViewModel : ObservableObject
         }
 
         ExpenseCategories.Clear();
-        foreach (var categoryName in ExpenseCategoryOrder)
+        foreach (var category in ExpenseCategoryCatalog.SelectAssignable(Categories, static option => option.Name))
         {
-            var match = Categories.FirstOrDefault(category =>
-                string.Equals(category.Name, categoryName, StringComparison.OrdinalIgnoreCase));
-
-            if (match is not null && ExpenseCategories.All(existing => !string.Equals(existing.Name, match.Name, StringComparison.OrdinalIgnoreCase)))
-            {
-                ExpenseCategories.Add(match);
-            }
+            ExpenseCategories.Add(category);
         }
 
         if (SelectedCategory is null || Categories.All(category => category.Id != SelectedCategory.Id))
@@ -1271,109 +1161,6 @@ public sealed class MainWindowViewModel : ObservableObject
         }
     }
 
-    private async Task RefreshRulesQueueAsync(string? fileContent = null)
-    {
-        ImportedRuleTransactions.Clear();
-
-        if (string.IsNullOrWhiteSpace(fileContent))
-        {
-            if (string.IsNullOrWhiteSpace(ImportFilePath) || !File.Exists(ImportFilePath))
-            {
-                RulesQueueSummary = "Potential new rules: 0";
-                return;
-            }
-
-            fileContent = await File.ReadAllTextAsync(ImportFilePath);
-        }
-
-        if (string.IsNullOrWhiteSpace(fileContent))
-        {
-            RulesQueueSummary = "Potential new rules: 0";
-            return;
-        }
-
-        var preview = await _previewPotentialRulesUseCase.ExecuteAsync(fileContent);
-        if (preview.Errors.Count > 0)
-        {
-            RulesQueueSummary = "Potential new rules: 0";
-            RulesQueuePageInfo = "Page 1/1";
-            _rulesQueueRows.Clear();
-            _rulesQueueTotalMatchedCount = 0;
-            _rulesQueueCurrentPage = 1;
-            RaiseCommands();
-            return;
-        }
-
-        _rulesQueueRows.Clear();
-        _rulesQueueRows.AddRange(preview.PotentialRows);
-        _rulesQueueTotalMatchedCount = _rulesQueueRows.Count;
-        _rulesQueueCurrentPage = 1;
-        RefreshRulesQueuePage();
-        RulesQueueSummary = $"Potential new rules: {preview.PotentialRows.Count}";
-    }
-
-    private void MoveNextRulesQueuePage()
-    {
-        if (!CanMoveNextRulesQueuePage())
-        {
-            return;
-        }
-
-        _rulesQueueCurrentPage++;
-        RefreshRulesQueuePage();
-    }
-
-    private void MovePreviousRulesQueuePage()
-    {
-        if (_rulesQueueCurrentPage <= 1)
-        {
-            return;
-        }
-
-        _rulesQueueCurrentPage--;
-        RefreshRulesQueuePage();
-    }
-
-    private void RefreshRulesQueuePage()
-    {
-        ImportedRuleTransactions.Clear();
-
-        if (_rulesQueueTotalMatchedCount <= 0)
-        {
-            _rulesQueueCurrentPage = 1;
-            RulesQueuePageInfo = "Page 1/1";
-            RaiseCommands();
-            return;
-        }
-
-        var totalPages = Math.Max(1, (int)Math.Ceiling(_rulesQueueTotalMatchedCount / (double)RulesQueuePageSize));
-        if (_rulesQueueCurrentPage > totalPages)
-        {
-            _rulesQueueCurrentPage = totalPages;
-        }
-
-        var skip = (_rulesQueueCurrentPage - 1) * RulesQueuePageSize;
-        var pageRows = _rulesQueueRows
-            .Skip(skip)
-            .Take(RulesQueuePageSize);
-
-        foreach (var row in pageRows)
-        {
-            var viewModel = new EditableRulesImportedTransactionViewModel(
-                Guid.NewGuid(),
-                row.BookingDate,
-                FormatDescriptionForDisplay(row.Description),
-                row.Amount,
-                GetDefaultPotentialRuleCategory());
-
-            viewModel.PropertyChanged += OnImportedRuleTransactionChanged;
-            ImportedRuleTransactions.Add(viewModel);
-        }
-
-        RulesQueuePageInfo = $"Page {_rulesQueueCurrentPage}/{totalPages}";
-        RaiseCommands();
-    }
-
     private async Task RefreshParsedCategoryExpensesAsync(string? fileContent = null)
     {
         if (string.IsNullOrWhiteSpace(fileContent))
@@ -1509,33 +1296,7 @@ public sealed class MainWindowViewModel : ObservableObject
     }
 
     private string FormatDescriptionForDisplay(string description)
-    {
-        var value = description;
-        var orderedPrefixes = PrefixFilters
-            .Select(static item => item.Value)
-            .Where(static prefix => !string.IsNullOrWhiteSpace(prefix))
-            .OrderByDescending(static prefix => prefix.Length)
-            .ToArray();
-
-        var changed = true;
-        while (changed && orderedPrefixes.Length > 0)
-        {
-            changed = false;
-            foreach (var prefix in orderedPrefixes)
-            {
-                if (!value.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
-                {
-                    continue;
-                }
-
-                value = value[prefix.Length..].TrimStart(' ', '-', ':');
-                changed = true;
-                break;
-            }
-        }
-
-        return string.IsNullOrWhiteSpace(value) ? description : value;
-    }
+        => DescriptionPrefixStripper.Strip(description, PrefixFilters.Select(static item => item.Value));
 
     private static string BuildWarningBreakdown(IReadOnlyList<BankStatementParseWarning> warnings)
     {
@@ -1552,21 +1313,6 @@ public sealed class MainWindowViewModel : ObservableObject
         return $"Warnings: {warnings.Count} ({string.Join(", ", grouped)})";
     }
 
-    private CategoryOptionViewModel? GetDefaultPotentialRuleCategory()
-    {
-        var noneCategory = ExpenseCategories.FirstOrDefault(category =>
-            string.Equals(category.Name, "None", StringComparison.OrdinalIgnoreCase));
-        if (noneCategory is not null)
-        {
-            return noneCategory;
-        }
-
-        var preferred = ExpenseCategories.FirstOrDefault(category =>
-            !string.Equals(category.Name, "Uncategorized", StringComparison.OrdinalIgnoreCase));
-
-        return preferred ?? ExpenseCategories.FirstOrDefault() ?? Categories.FirstOrDefault();
-    }
-
     private void RaiseCommands()
     {
         (ImportCommand as DelegateCommand)?.RaiseCanExecuteChanged();
@@ -1577,20 +1323,16 @@ public sealed class MainWindowViewModel : ObservableObject
         (ExportCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (ImportPackageCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (ApplyFiltersCommand as DelegateCommand)?.RaiseCanExecuteChanged();
-        (RefreshRulesQueueCommand as DelegateCommand)?.RaiseCanExecuteChanged();
-        (NextRulesQueuePageCommand as DelegateCommand)?.RaiseCanExecuteChanged();
-        (PreviousRulesQueuePageCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (ClearAllRulesCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (ClearAllTransactionsCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (MergeMatchedTransactionsCommand as DelegateCommand)?.RaiseCanExecuteChanged();
-        (SavePotentialRuleCommand as DelegateCommand<EditableRulesImportedTransactionViewModel>)?.RaiseCanExecuteChanged();
-        (SaveAllPotentialRulesCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (AddPrefixFilterCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (RemovePrefixFilterCommand as DelegateCommand<PrefixFilterItemViewModel>)?.RaiseCanExecuteChanged();
         (ResetTransactionFiltersCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (NextPageCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (PreviousPageCommand as DelegateCommand)?.RaiseCanExecuteChanged();
         (ManualRecategorizeCommand as DelegateCommand)?.RaiseCanExecuteChanged();
+        PotentialRules.RaiseCanExecuteChanged();
     }
 
     private bool CanMoveNextPage()
@@ -1608,16 +1350,6 @@ public sealed class MainWindowViewModel : ObservableObject
            && !string.IsNullOrWhiteSpace(_stagedMatchedFileContent)
            && !string.IsNullOrWhiteSpace(_stagedMatchedSourceName);
 
-    private bool CanMoveNextRulesQueuePage()
-    {
-        if (_rulesQueueTotalMatchedCount <= 0)
-        {
-            return false;
-        }
-
-        return _rulesQueueCurrentPage * RulesQueuePageSize < _rulesQueueTotalMatchedCount;
-    }
-
     private void SetSelectedView(string selectedView)
     {
         if (string.Equals(_selectedView, selectedView, StringComparison.Ordinal))
@@ -1632,15 +1364,6 @@ public sealed class MainWindowViewModel : ObservableObject
         OnPropertyChanged(nameof(IsUtilityViewSelected));
     }
 
-    private void OnImportedRuleTransactionChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (e.PropertyName is nameof(EditableRulesImportedTransactionViewModel.Description)
-            or nameof(EditableRulesImportedTransactionViewModel.SelectedCategory))
-        {
-            RaiseCommands();
-        }
-    }
-
     public async Task LoadInitialStateAsync()
     {
         await RunBusyAsync(async () =>
@@ -1652,7 +1375,7 @@ public sealed class MainWindowViewModel : ObservableObject
             await ReloadPrefixFiltersAsync();
             await RefreshLedgerAsync();
             await RefreshDashboardAsync();
-            await RefreshRulesQueueAsync();
+            await PotentialRules.RefreshAsync();
             await RefreshParsedCategoryExpensesAsync();
             Status = "Ready";
         });

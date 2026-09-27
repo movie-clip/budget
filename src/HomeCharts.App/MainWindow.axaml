@@ -385,7 +385,7 @@
                     </Border>
                 </Grid>
             </Grid>
-            <Border Background="#111827" CornerRadius="14" BorderBrush="#1F2937" BorderThickness="1" Padding="18" IsVisible="{Binding IsImportFiltersViewSelected}">
+            <Border Grid.Row="3" Background="#111827" CornerRadius="14" BorderBrush="#1F2937" BorderThickness="1" Padding="18" IsVisible="{Binding IsImportFiltersViewSelected}">
                 <Grid RowDefinitions="Auto,*" RowSpacing="14">
                     <Grid ColumnDefinitions="1.15*,1.15*,0.7*" ColumnSpacing="18">
                         <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="12" Padding="18">
@@ -419,16 +419,16 @@
                     </Grid>
 
                     <Grid Grid.Row="1" ColumnDefinitions="1.7*,1*" ColumnSpacing="18">
-                        <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="12" Padding="14">
+                        <Border DataContext="{Binding PotentialRules}" x:DataType="mvp:PotentialRulesViewModel" Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="12" Padding="14">
                             <Grid RowDefinitions="Auto,*" RowSpacing="10">
-                                <WrapPanel Orientation="Horizontal" ItemHeight="32" VerticalAlignment="Center">
+                                <WrapPanel Orientation="Horizontal" ItemSpacing="12" LineSpacing="8" VerticalAlignment="Center">
                                     <TextBlock Text="Potential New Rules" Foreground="#F8FAFC" FontSize="18" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding RulesQueueSummary}" Foreground="#94A3B8" VerticalAlignment="Center" Margin="12,0,0,0"/>
-                                    <Button Classes="finance-primary" Content="Apply All" Command="{Binding SaveAllPotentialRulesCommand}" Margin="12,0,0,0"/>
-                                    <Button Content="Refresh Queue" Command="{Binding RefreshRulesQueueCommand}" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0"/>
-                                    <Button Content="Prev" Command="{Binding PreviousRulesQueuePageCommand}" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0"/>
-                                    <Button Content="Next" Command="{Binding NextRulesQueuePageCommand}" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0"/>
-                                    <TextBlock Text="{Binding RulesQueuePageInfo}" Foreground="#94A3B8" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                                    <TextBlock Text="{Binding Summary}" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                    <Button Classes="finance-primary" Content="{Binding ApplyAllText}" Command="{Binding ApplyAllCommand}"/>
+                                    <Button Content="Refresh Queue" Command="{Binding RefreshCommand}" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0"/>
+                                    <Button Content="Prev" Command="{Binding PreviousPageCommand}" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0"/>
+                                    <Button Content="Next" Command="{Binding NextPageCommand}" Background="#0F172A" BorderBrush="#334155" Foreground="#E2E8F0"/>
+                                    <TextBlock Text="{Binding PageInfo}" Foreground="#94A3B8" VerticalAlignment="Center"/>
                                 </WrapPanel>
 
                                 <Border Grid.Row="1" Background="#111827" BorderBrush="#334155" BorderThickness="1" CornerRadius="10" Padding="12" MinHeight="280">
@@ -444,14 +444,28 @@
                                         </Border>
 
                                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                                            <ItemsControl ItemsSource="{Binding ImportedRuleTransactions}">
+                                            <ItemsControl ItemsSource="{Binding Rows}">
                                                 <ItemsControl.ItemTemplate>
-                                                    <DataTemplate x:DataType="mvp:EditableRulesImportedTransactionViewModel">
-                                                        <Border Background="#0F172A" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,8">
+                                                    <DataTemplate x:DataType="mvp:PotentialRuleRowViewModel">
+                                                        <Border Classes="potential-rule-row"
+                                                                Classes.modified="{Binding IsModified}"
+                                                                Background="#0F172A"
+                                                                BorderThickness="1"
+                                                                CornerRadius="10"
+                                                                Padding="12"
+                                                                Margin="0,0,0,8">
+                                                            <Border.Styles>
+                                                                <Style Selector="Border.potential-rule-row">
+                                                                    <Setter Property="BorderBrush" Value="#1E293B"/>
+                                                                </Style>
+                                                                <Style Selector="Border.potential-rule-row.modified">
+                                                                    <Setter Property="BorderBrush" Value="#3B82F6"/>
+                                                                </Style>
+                                                            </Border.Styles>
                                                             <Grid ColumnDefinitions="110,*,110,190,96" ColumnSpacing="10" VerticalAlignment="Center">
                                                                 <TextBlock Text="{Binding BookingDateText}" Foreground="#CBD5E1" VerticalAlignment="Center"/>
                                                                 <TextBox Grid.Column="1"
-                                                                          Text="{Binding Description}"
+                                                                         Text="{Binding Description}"
                                                                          Watermark="Type matching string..."
                                                                          Background="#111827"
                                                                          BorderBrush="#334155"
@@ -460,7 +474,7 @@
                                                                          Padding="10,6"/>
                                                                 <TextBlock Grid.Column="2" Text="{Binding AmountText}" Foreground="#CBD5E1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
                                                                 <ComboBox Grid.Column="3"
-                                                                          ItemsSource="{ReflectionBinding DataContext.ExpenseCategories, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                                          ItemsSource="{Binding Categories}"
                                                                           SelectedItem="{Binding SelectedCategory}"
                                                                           MinWidth="180"
                                                                           VerticalAlignment="Center">
@@ -473,8 +487,7 @@
                                                                 <Button Grid.Column="4"
                                                                         Classes="finance-primary"
                                                                         Content="Save"
-                                                                        Command="{ReflectionBinding DataContext.SavePotentialRuleCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                                                        CommandParameter="{Binding .}"
+                                                                        Command="{Binding SaveCommand}"
                                                                         HorizontalAlignment="Stretch"
                                                                         VerticalAlignment="Center"
                                                                         Padding="12,6"/>

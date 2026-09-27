@@ -32,7 +32,7 @@ internal sealed class CompositionRoot
         var seedDefaultCategoriesUseCase = new SeedDefaultCategoriesUseCase(categoryRepository);
         var checkImportDuplicateUseCase = new CheckImportDuplicateUseCase(importBatchRepository);
         var bankStatementParser = new BankStatementParser();
-        var previewPotentialRulesUseCase = new PreviewPotentialRulesUseCase(ruleRepository, bankStatementParser);
+        var previewPotentialRulesUseCase = new PreviewPotentialRulesUseCase(ruleRepository, categoryRepository, prefixFilterRepository, bankStatementParser);
         var previewParsedCategoryExpensesUseCase = new PreviewParsedCategoryExpensesUseCase(ruleRepository, categoryRepository, bankStatementParser);
         var previewMatchedTransactionsUseCase = new PreviewMatchedTransactionsUseCase(ruleRepository, categoryRepository, bankStatementParser);
         var importBankStatementUseCase = new ImportBankStatementUseCase(
@@ -54,7 +54,7 @@ internal sealed class CompositionRoot
         var deleteAllRulesUseCase = new DeleteAllRulesUseCase(ruleRepository);
         var deleteAllTransactionsUseCase = new DeleteAllTransactionsUseCase(manualOverrideRepository, transactionRepository, importBatchRepository);
         var createCategorizationRuleUseCase = new CreateCategorizationRuleUseCase(ruleRepository);
-        var createCategorizationRulesBatchUseCase = new CreateCategorizationRulesBatchUseCase(createCategorizationRuleUseCase);
+        var applyPotentialRulesUseCase = new ApplyPotentialRulesUseCase(createCategorizationRuleUseCase);
         var getLedgerEntriesUseCase = new GetLedgerEntriesUseCase(transactionRepository, categoryRepository);
         var buildDashboardSnapshotUseCase = new BuildDashboardSnapshotUseCase(transactionRepository, categoryRepository);
         var getCategoriesUseCase = new GetCategoriesUseCase(categoryRepository);
@@ -78,8 +78,7 @@ internal sealed class CompositionRoot
             previewParsedCategoryExpensesUseCase,
             deleteAllRulesUseCase,
             deleteAllTransactionsUseCase,
-            createCategorizationRuleUseCase,
-            createCategorizationRulesBatchUseCase,
+            applyPotentialRulesUseCase,
             getLedgerEntriesUseCase,
             buildDashboardSnapshotUseCase,
             getCategoriesUseCase,

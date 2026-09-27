@@ -18,12 +18,8 @@ public sealed class MainWindowViewModelTrendBarScalingTests
     [TestMethod]
     public async Task LoadInitialStateAsync_OneSeriesFarLargerThanTheOther_ScalesBothBarsAgainstOneSharedMaximum()
     {
-        var transactionRepository = new InMemoryTransactionRepository();
-        var categoryRepository = new InMemoryCategoryRepository();
-        var ruleRepository = new InMemoryRuleRepository();
-        var prefixFilterRepository = new InMemoryPrefixFilterRepository();
-        var importBatchRepository = new InMemoryImportBatchRepository();
-        var manualOverrideRepository = new InMemoryManualOverrideRepository();
+        var repositories = new TestRepositories();
+        var transactionRepository = repositories.Transactions;
 
         var today = DateOnly.FromDateTime(DateTime.Today);
         await transactionRepository.UpsertManyAsync([
@@ -47,34 +43,7 @@ public sealed class MainWindowViewModelTrendBarScalingTests
             }
         ]);
 
-        var parser = new BankStatementParser();
-        var checkImportDuplicateUseCase = new CheckImportDuplicateUseCase(importBatchRepository);
-        var createCategorizationRuleUseCase = new CreateCategorizationRuleUseCase(ruleRepository);
-
-        var viewModel = new MainWindowViewModel(
-            new InitializeDatabaseUseCase(new NoOpMigrationRunner()),
-            new SeedDefaultCategoriesUseCase(categoryRepository),
-            new ImportBankStatementUseCase(transactionRepository, importBatchRepository, parser, checkImportDuplicateUseCase),
-            new PreviewMatchedTransactionsUseCase(ruleRepository, categoryRepository, parser),
-            new MergeMatchedTransactionsUseCase(transactionRepository, importBatchRepository, ruleRepository, parser, checkImportDuplicateUseCase),
-            new ApplyCategorizationRulesUseCase(transactionRepository, ruleRepository, manualOverrideRepository, categoryRepository),
-            new PreviewPotentialRulesUseCase(ruleRepository, parser),
-            new PreviewParsedCategoryExpensesUseCase(ruleRepository, categoryRepository, parser),
-            new DeleteAllRulesUseCase(ruleRepository),
-            new DeleteAllTransactionsUseCase(manualOverrideRepository, transactionRepository, importBatchRepository),
-            createCategorizationRuleUseCase,
-            new CreateCategorizationRulesBatchUseCase(createCategorizationRuleUseCase),
-            new GetLedgerEntriesUseCase(transactionRepository, categoryRepository),
-            new BuildDashboardSnapshotUseCase(transactionRepository, categoryRepository),
-            new GetCategoriesUseCase(categoryRepository),
-            new ManualRecategorizationUseCase(transactionRepository, manualOverrideRepository),
-            new GetPrefixFiltersUseCase(prefixFilterRepository),
-            new AddPrefixFilterUseCase(prefixFilterRepository),
-            new RemovePrefixFilterUseCase(prefixFilterRepository),
-            new CreateDatabaseBackupUseCase(new NoOpDataMaintenanceService()),
-            new RestoreDatabaseBackupUseCase(new NoOpDataMaintenanceService()),
-            new ExportDataPackageUseCase(categoryRepository, ruleRepository, transactionRepository),
-            new ImportDataPackageUseCase(categoryRepository, ruleRepository, transactionRepository));
+        var viewModel = TestViewModelFactory.Create(repositories);
 
         await viewModel.LoadInitialStateAsync();
 

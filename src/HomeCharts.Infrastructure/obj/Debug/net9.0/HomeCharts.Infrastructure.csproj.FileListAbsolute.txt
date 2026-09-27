@@ -34,3 +34,6 @@ C:\projects\investments\budget\src\HomeCharts.Infrastructure\obj\Debug\net9.0\Ho
 C:\projects\investments\budget\src\HomeCharts.Infrastructure\obj\Debug\net9.0\refint\HomeCharts.Infrastructure.dll
 C:\projects\investments\budget\src\HomeCharts.Infrastructure\obj\Debug\net9.0\HomeCharts.Infrastructure.pdb
 C:\projects\investments\budget\src\HomeCharts.Infrastructure\obj\Debug\net9.0\ref\HomeCharts.Infrastructure.dll
+C:\Users\MovieClip\AppData\Local\Temp\hc_out\HomeCharts.Infrastructure.deps.json
+C:\Users\MovieClip\AppData\Local\Temp\hc_out\HomeCharts.Infrastructure.dll
+C:\Users\MovieClip\AppData\Local\Temp\hc_out\HomeCharts.Infrastructure.pdb

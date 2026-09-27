@@ -30,3 +30,6 @@ C:\projects\investments\budget\src\HomeCharts.Contracts\obj\Debug\net9.0\HomeCha
 C:\projects\investments\budget\src\HomeCharts.Contracts\obj\Debug\net9.0\refint\HomeCharts.Contracts.dll
 C:\projects\investments\budget\src\HomeCharts.Contracts\obj\Debug\net9.0\HomeCharts.Contracts.pdb
 C:\projects\investments\budget\src\HomeCharts.Contracts\obj\Debug\net9.0\ref\HomeCharts.Contracts.dll
+C:\Users\MovieClip\AppData\Local\Temp\hc_out\HomeCharts.Contracts.deps.json
+C:\Users\MovieClip\AppData\Local\Temp\hc_out\HomeCharts.Contracts.dll
+C:\Users\MovieClip\AppData\Local\Temp\hc_out\HomeCharts.Contracts.pdb

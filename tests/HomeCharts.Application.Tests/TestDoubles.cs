@@ -207,3 +207,52 @@ internal sealed class NoOpDataMaintenanceService(string databasePath = "C:/data/
 
     public string GetDatabasePath() => databasePath;
 }
+
+/// <summary>The full set of in-memory repositories a <c>MainWindowViewModel</c> needs.</summary>
+internal sealed class TestRepositories
+{
+    public InMemoryTransactionRepository Transactions { get; } = new();
+    public InMemoryCategoryRepository Categories { get; } = new();
+    public InMemoryRuleRepository Rules { get; } = new();
+    public InMemoryPrefixFilterRepository PrefixFilters { get; } = new();
+    public InMemoryImportBatchRepository ImportBatches { get; } = new();
+    public InMemoryManualOverrideRepository ManualOverrides { get; } = new();
+}
+
+/// <summary>
+/// Single home for the ~22-argument <c>MainWindowViewModel</c> constructor call so a signature
+/// change is fixed in one place instead of once per view-model test file.
+/// </summary>
+internal static class TestViewModelFactory
+{
+    public static HomeCharts.Presentation.Mvp.MainWindowViewModel Create(TestRepositories repositories)
+    {
+        var parser = new HomeCharts.Application.Import.BankStatementParser();
+        var checkImportDuplicateUseCase = new HomeCharts.Application.UseCases.CheckImportDuplicateUseCase(repositories.ImportBatches);
+        var createRule = new HomeCharts.Application.UseCases.CreateCategorizationRuleUseCase(repositories.Rules);
+
+        return new HomeCharts.Presentation.Mvp.MainWindowViewModel(
+            new HomeCharts.Application.UseCases.InitializeDatabaseUseCase(new NoOpMigrationRunner()),
+            new HomeCharts.Application.UseCases.SeedDefaultCategoriesUseCase(repositories.Categories),
+            new HomeCharts.Application.UseCases.ImportBankStatementUseCase(repositories.Transactions, repositories.ImportBatches, parser, checkImportDuplicateUseCase),
+            new HomeCharts.Application.UseCases.PreviewMatchedTransactionsUseCase(repositories.Rules, repositories.Categories, parser),
+            new HomeCharts.Application.UseCases.MergeMatchedTransactionsUseCase(repositories.Transactions, repositories.ImportBatches, repositories.Rules, parser, checkImportDuplicateUseCase),
+            new HomeCharts.Application.UseCases.ApplyCategorizationRulesUseCase(repositories.Transactions, repositories.Rules, repositories.ManualOverrides, repositories.Categories),
+            new HomeCharts.Application.UseCases.PreviewPotentialRulesUseCase(repositories.Rules, repositories.Categories, repositories.PrefixFilters, parser),
+            new HomeCharts.Application.UseCases.PreviewParsedCategoryExpensesUseCase(repositories.Rules, repositories.Categories, parser),
+            new HomeCharts.Application.UseCases.DeleteAllRulesUseCase(repositories.Rules),
+            new HomeCharts.Application.UseCases.DeleteAllTransactionsUseCase(repositories.ManualOverrides, repositories.Transactions, repositories.ImportBatches),
+            new HomeCharts.Application.UseCases.ApplyPotentialRulesUseCase(createRule),
+            new HomeCharts.Application.UseCases.GetLedgerEntriesUseCase(repositories.Transactions, repositories.Categories),
+            new HomeCharts.Application.UseCases.BuildDashboardSnapshotUseCase(repositories.Transactions, repositories.Categories),
+            new HomeCharts.Application.UseCases.GetCategoriesUseCase(repositories.Categories),
+            new HomeCharts.Application.UseCases.ManualRecategorizationUseCase(repositories.Transactions, repositories.ManualOverrides),
+            new HomeCharts.Application.UseCases.GetPrefixFiltersUseCase(repositories.PrefixFilters),
+            new HomeCharts.Application.UseCases.AddPrefixFilterUseCase(repositories.PrefixFilters),
+            new HomeCharts.Application.UseCases.RemovePrefixFilterUseCase(repositories.PrefixFilters),
+            new HomeCharts.Application.UseCases.CreateDatabaseBackupUseCase(new NoOpDataMaintenanceService()),
+            new HomeCharts.Application.UseCases.RestoreDatabaseBackupUseCase(new NoOpDataMaintenanceService()),
+            new HomeCharts.Application.UseCases.ExportDataPackageUseCase(repositories.Categories, repositories.Rules, repositories.Transactions),
+            new HomeCharts.Application.UseCases.ImportDataPackageUseCase(repositories.Categories, repositories.Rules, repositories.Transactions));
+    }
+}

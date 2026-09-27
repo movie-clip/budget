@@ -217,3 +217,8 @@ C:\projects\investments\budget\src\HomeCharts.App\obj\Debug\net9.0\refint\HomeCh
 C:\projects\investments\budget\src\HomeCharts.App\obj\Debug\net9.0\HomeCharts.App.pdb
 C:\projects\investments\budget\src\HomeCharts.App\obj\Debug\net9.0\HomeCharts.App.genruntimeconfig.cache
 C:\projects\investments\budget\src\HomeCharts.App\obj\Debug\net9.0\ref\HomeCharts.App.dll
+C:\Users\MovieClip\AppData\Local\Temp\hc_out\HomeCharts.App.exe
+C:\Users\MovieClip\AppData\Local\Temp\hc_out\HomeCharts.App.deps.json
+C:\Users\MovieClip\AppData\Local\Temp\hc_out\HomeCharts.App.runtimeconfig.json
+C:\Users\MovieClip\AppData\Local\Temp\hc_out\HomeCharts.App.dll
+C:\Users\MovieClip\AppData\Local\Temp\hc_out\HomeCharts.App.pdb

@@ -24,8 +24,23 @@ Legacy WPF code is reference-only for behavior intent. Active implementation is 
 
 ### 2) Rule Management
 
-- Potential rules are listed in pageable form.
-- Each row supports inline edit + category select + save.
+- "Potential New Rules" is a single list of transactions from the currently
+  loaded import file that no active rule matches yet.
+- Each row shows date, amount, an editable description/match-string field, an
+  expense-category dropdown (defaulted from the suggested category), and a
+  per-row **Save** button that creates a `Contains` rule from that row alone.
+- **Apply All** saves every row whose description or category has been
+  changed from its suggested default, across all pages; its label shows the
+  count of such rows, e.g. `Apply All (3)`, and it is disabled when none
+  qualify.
+- **Refresh Queue** re-evaluates the list against the current file and rule
+  set. **Prev/Next** page through the list (still paged, 120 rows per page).
+- A row whose description or category has been edited from its suggested
+  default is highlighted with a blue border.
+- Unsaved edits survive a Refresh Queue, a per-row Save, or an Apply All (for
+  every row still present in the recomputed list). Loading a different file,
+  or any refresh caused by importing/re-importing, resets all rows to their
+  suggested defaults.
 - Rule precedence is deterministic:
   - `Exact > Regex > Contains`
   - then by higher priority

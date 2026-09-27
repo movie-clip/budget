@@ -38,68 +38,6 @@ public sealed class ApplicationUseCaseTests
     }
 
     [TestMethod]
-    public async Task CreateCategorizationRulesBatchUseCase_CreatesAndCountsCreatedDuplicateAndInvalidItems()
-    {
-        var groceriesId = Guid.NewGuid();
-        var servicesId = Guid.NewGuid();
-        var repository = new FakeRuleRepository
-        {
-            Rules =
-            [
-                new CategorizationRule
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Contains OPENAI",
-                    Pattern = "OPENAI",
-                    MatchType = RuleMatchType.Contains,
-                    Priority = 5,
-                    CategoryId = servicesId,
-                    IsActive = true
-                }
-            ]
-        };
-
-        var single = new CreateCategorizationRuleUseCase(repository);
-        var batch = new CreateCategorizationRulesBatchUseCase(single);
-
-        var result = await batch.ExecuteAsync(
-        [
-            new CreateCategorizationRulesBatchItem("MERCADONA", groceriesId),
-            new CreateCategorizationRulesBatchItem("OPENAI", servicesId),
-            new CreateCategorizationRulesBatchItem("   ", groceriesId)
-        ]);
-
-        Assert.AreEqual(1, result.CreatedCount);
-        Assert.AreEqual(1, result.DuplicateCount);
-        Assert.AreEqual(1, result.InvalidCount);
-        Assert.IsTrue(repository.Rules.Any(rule => rule.Pattern == "MERCADONA" && rule.CategoryId == groceriesId));
-    }
-
-    [TestMethod]
-    public void EditableRulesImportedTransactionViewModel_TracksModifiedStateFromDescriptionAndCategory()
-    {
-        var none = new CategoryOptionViewModel(Guid.NewGuid(), "None", "#94A3B8");
-        var education = new CategoryOptionViewModel(Guid.NewGuid(), "Education", "#0EA5E9");
-        var row = new EditableRulesImportedTransactionViewModel(
-            Guid.NewGuid(),
-            new DateOnly(2026, 3, 18),
-            "OPENAI *CHATGPT SUBSCR",
-            -20.72m,
-            none);
-
-        Assert.IsFalse(row.IsModified);
-
-        row.Description = "OPENAI";
-        Assert.IsTrue(row.IsModified);
-
-        row.Description = "OPENAI *CHATGPT SUBSCR";
-        Assert.IsFalse(row.IsModified);
-
-        row.SelectedCategory = education;
-        Assert.IsTrue(row.IsModified);
-    }
-
-    [TestMethod]
     public async Task CheckImportDuplicateUseCase_ReturnsDuplicateForExistingHash()
     {
         const string fileContent = "30/06/2025|COMPRA TARJ. 5402XXXXXXXX7020 OPENAI *CHATGPT SUBSCR-SAN FRANCISCO|30/06/2025|-20.72|22482.40||5402__7020";
@@ -1065,13 +1003,13 @@ public sealed class ApplicationUseCaseTests
 
         var ruleRepository = new FakeRuleRepository { Rules = [] };
         var parser = new BankStatementParser();
-        var useCase = new PreviewPotentialRulesUseCase(ruleRepository, parser);
+        var useCase = new PreviewPotentialRulesUseCase(ruleRepository, new FakeCategoryRepository(), new InMemoryPrefixFilterRepository(), parser);
 
         var result = await useCase.ExecuteAsync(content);
 
         Assert.AreEqual(0, result.Errors.Count);
         Assert.AreEqual(1, result.PotentialRows.Count);
-        Assert.AreEqual("COMPRA TARJ. OPENAI", result.PotentialRows[0].Description);
+        Assert.AreEqual("COMPRA TARJ. OPENAI", result.PotentialRows[0].RawDescription);
     }
 
     [TestMethod]
@@ -1096,7 +1034,7 @@ public sealed class ApplicationUseCaseTests
             ]
         };
         var parser = new BankStatementParser();
-        var useCase = new PreviewPotentialRulesUseCase(ruleRepository, parser);
+        var useCase = new PreviewPotentialRulesUseCase(ruleRepository, new FakeCategoryRepository(), new InMemoryPrefixFilterRepository(), parser);
 
         var result = await useCase.ExecuteAsync(content);
 

@@ -38,3 +38,6 @@ C:\projects\investments\budget\src\HomeCharts.Presentation\obj\Debug\net9.0\Home
 C:\projects\investments\budget\src\HomeCharts.Presentation\obj\Debug\net9.0\refint\HomeCharts.Presentation.dll
 C:\projects\investments\budget\src\HomeCharts.Presentation\obj\Debug\net9.0\HomeCharts.Presentation.pdb
 C:\projects\investments\budget\src\HomeCharts.Presentation\obj\Debug\net9.0\ref\HomeCharts.Presentation.dll
+C:\Users\MovieClip\AppData\Local\Temp\hc_out\HomeCharts.Presentation.deps.json
+C:\Users\MovieClip\AppData\Local\Temp\hc_out\HomeCharts.Presentation.dll
+C:\Users\MovieClip\AppData\Local\Temp\hc_out\HomeCharts.Presentation.pdb
