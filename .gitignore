@@ -1,2 +1,6 @@
 ﻿.idea
 .vs
+src/*/bin
+src/*/obj
+tests/*/bin
+tests/*/obj
