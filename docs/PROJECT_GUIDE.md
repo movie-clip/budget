@@ -26,6 +26,11 @@ Legacy WPF code is reference-only for behavior intent. Active implementation is 
 
 - "Potential New Rules" is a single list of transactions from the currently
   loaded import file that no active rule matches yet.
+- The list's default order is most-repeated suggested pattern first: rows are
+  grouped by their suggested `Contains` match string and sorted by how many
+  unmatched rows in this import file share that pattern (highest count
+  first), not by any historical or cross-import count. Rows whose pattern
+  count ties keep their original parse order.
 - Each row shows date, amount, an editable description/match-string field, an
   expense-category dropdown (defaulted from the suggested category), and a
   per-row **Save** button that creates a `Contains` rule from that row alone.

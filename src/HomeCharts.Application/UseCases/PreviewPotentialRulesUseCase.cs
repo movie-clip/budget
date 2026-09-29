@@ -46,11 +46,21 @@ public sealed class PreviewPotentialRulesUseCase(
                     row.Description,
                     row.Amount,
                     DescriptionPrefixStripper.Strip(row.Description, prefixes),
-                    defaultCategoryId));
+                    defaultCategoryId,
+                    0));
             }
         }
 
-        return new PreviewPotentialRulesResult(potentialRows, parse.Errors, parse.Warnings);
+        var occurrenceCounts = potentialRows
+            .GroupBy(static row => row.SuggestedPattern, StringComparer.Ordinal)
+            .ToDictionary(static group => group.Key, group => group.Count(), StringComparer.Ordinal);
+
+        var orderedRows = potentialRows
+            .Select(row => row with { OccurrenceCount = occurrenceCounts[row.SuggestedPattern] })
+            .OrderByDescending(static row => row.OccurrenceCount)
+            .ToList();
+
+        return new PreviewPotentialRulesResult(orderedRows, parse.Errors, parse.Warnings);
     }
 
     private static string BuildRowKey(int lineNumber, DateOnly bookingDate, decimal amount, string rawDescription)
@@ -85,7 +95,8 @@ public sealed record PotentialRuleRow(
     string RawDescription,
     decimal Amount,
     string SuggestedPattern,
-    Guid? SuggestedCategoryId);
+    Guid? SuggestedCategoryId,
+    int OccurrenceCount = 0);
 
 public sealed record PreviewPotentialRulesResult(
     IReadOnlyList<PotentialRuleRow> PotentialRows,

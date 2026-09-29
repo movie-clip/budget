@@ -56,13 +56,16 @@ public sealed class PotentialRuleDraftTests
     [TestMethod]
     public void FromRow_StartsAtBaselineAndUnmodified()
     {
-        var row = new PotentialRuleRow("k", 1, new DateOnly(2025, 6, 30), "COMPRA TARJ. OPENAI", -20.72m, "OPENAI", NoneId);
+        // OccurrenceCount is passed explicitly (not left at its default) so this
+        // test does not rely on the record's default value to keep compiling.
+        var row = new PotentialRuleRow("k", 1, new DateOnly(2025, 6, 30), "COMPRA TARJ. OPENAI", -20.72m, "OPENAI", NoneId, OccurrenceCount: 4);
 
         var draft = PotentialRuleDraft.FromRow(row);
 
         Assert.AreEqual("OPENAI", draft.Pattern);
         Assert.AreEqual(NoneId, draft.CategoryId);
         Assert.IsFalse(draft.IsModified);
+        Assert.AreEqual(4, row.OccurrenceCount, "FromRow's draft carries no OccurrenceCount; assert it on the row directly so this test does not depend on the field's default.");
     }
 }
 
@@ -195,6 +198,55 @@ public sealed class PreviewPotentialRulesUseCaseSuggestionTests
         var result = await CreateUseCase(repositories).ExecuteAsync(OpenAiLine);
 
         Assert.AreEqual(1, result.PotentialRows.Count);
+    }
+
+    [TestMethod]
+    public async Task ExecuteAsync_SingleUnmatchedRow_OccurrenceCountIsOne()
+    {
+        var result = await CreateUseCase(new TestRepositories()).ExecuteAsync(OpenAiLine);
+
+        Assert.AreEqual(1, result.PotentialRows.Single().OccurrenceCount);
+    }
+
+    [TestMethod]
+    public async Task ExecuteAsync_RowsSharingSuggestedPattern_SortAheadOfSingletonsWithCorrectOccurrenceCounts()
+    {
+        const string StarbucksLine = "28/12/2023|COMPRA TARJ. 5402XXXXXXXX7020 STARBUCKS COFFEE PELAI-BARCELONA|31/12/2023|-9.30|5003.18||5402__7020";
+        const string MercadonaLine = "29/12/2023|COMPRA TARJ. 5402XXXXXXXX7020 MERCADONA SAGRADA FAMILIA-BARCELONA|01/01/2024|-22.95|4848.33||5402__7020";
+        var content = string.Join('\n', StarbucksLine, MercadonaLine, MercadonaLine, MercadonaLine);
+
+        var result = await CreateUseCase(new TestRepositories()).ExecuteAsync(content);
+
+        Assert.AreEqual(4, result.PotentialRows.Count);
+        var mercadonaDescription = MercadonaLine.Split('|')[1];
+        var starbucksDescription = StarbucksLine.Split('|')[1];
+
+        var leading = result.PotentialRows.Take(3).ToList();
+        Assert.IsTrue(leading.All(row => row.SuggestedPattern == mercadonaDescription), "the three repeated rows sort ahead of the singleton");
+        Assert.IsTrue(leading.All(row => row.OccurrenceCount == 3), "each repeated row reports the full group count");
+
+        var trailing = result.PotentialRows[3];
+        Assert.AreEqual(starbucksDescription, trailing.SuggestedPattern);
+        Assert.AreEqual(1, trailing.OccurrenceCount, "a singleton pattern reports an occurrence count of one");
+    }
+
+    [TestMethod]
+    public async Task ExecuteAsync_PatternsWithEqualOccurrenceCounts_PreserveOriginalParseOrder()
+    {
+        const string AlphaLine = "01/01/2024|COMPRA TARJ. ALPHA STORE-BARCELONA|01/01/2024|-10.00|1000.00||5402__7020";
+        const string BetaLine = "02/01/2024|COMPRA TARJ. BETA STORE-BARCELONA|02/01/2024|-20.00|2000.00||5402__7020";
+        // Interleaved so a naive "group then re-emit" sort would clump patterns together;
+        // a stable sort on equal OccurrenceCount must keep this exact original order instead.
+        var content = string.Join('\n', AlphaLine, BetaLine, AlphaLine, BetaLine);
+
+        var result = await CreateUseCase(new TestRepositories()).ExecuteAsync(content);
+
+        Assert.AreEqual(4, result.PotentialRows.Count);
+        Assert.IsTrue(result.PotentialRows.All(row => row.OccurrenceCount == 2), "both patterns occur twice");
+        CollectionAssert.AreEqual(
+            new[] { 1, 2, 3, 4 },
+            result.PotentialRows.Select(static row => row.LineNumber).ToList(),
+            "ties preserve original parse/file order rather than being re-sorted or grouped");
     }
 
     private static PreviewPotentialRulesUseCase CreateUseCase(TestRepositories repositories)
