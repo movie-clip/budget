@@ -2,7 +2,7 @@
 
 This repo is bound into the `.agentic` orchestration network (`budget/.agentic.json`
 points at `../.agentic`, project `budget`). If you were dispatched as a lane, your
-order and `<agenticRoot>/projects/budget/project.md` govern; this file is the
+order and `agentic/project.md` govern; this file is the
 fast, always-loaded context every session gets, agentic or not.
 
 ## Product
@@ -40,7 +40,7 @@ implementation is entirely under `src/HomeCharts.*`.
   is a defect to fix, not a build setting to relax.
 
 Absolute, and unnumbered on purpose: the agentic network's profile
-(`.agentic/projects/budget/project.md` § Hard guardrails) carries the same
+(`agentic/project.md` § Hard guardrails) carries the same
 five in the numbering the protocol cites, so a `REFUSED: guardrail 3` from a
 dispatched lane names exactly one thing.
 
