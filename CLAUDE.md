@@ -44,6 +44,14 @@ Absolute, and unnumbered on purpose: the agentic network's profile
 five in the numbering the protocol cites, so a `REFUSED: guardrail 3` from a
 dispatched lane names exactly one thing.
 
+A request to build, fix or investigate something here goes to
+`agentic-core:orchestrate-feature` first, including "the totals look wrong".
+The `mattpocock-skills` plugin is enabled for the network's dispatched lanes,
+and their capability packs say when each skill fires. It is not an entry point
+for a request: `diagnosing-bugs` on a wrong total, run outside a lane, changes
+rule precedence or a migration with no design pass and no integration gate, and
+leaves no ledger saying it happened.
+
 `AGENTS.md` restates these in more detail and is the deeper source on house
 style (naming, formatting, error handling, CI caveats) — not superseded by
 this file, just not repeated here.

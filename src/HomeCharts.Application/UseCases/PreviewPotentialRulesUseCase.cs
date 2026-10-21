@@ -51,13 +51,18 @@ public sealed class PreviewPotentialRulesUseCase(
             }
         }
 
-        var occurrenceCounts = potentialRows
+        var patternStats = potentialRows
             .GroupBy(static row => row.SuggestedPattern, StringComparer.Ordinal)
-            .ToDictionary(static group => group.Key, group => group.Count(), StringComparer.Ordinal);
+            .ToDictionary(
+                static group => group.Key,
+                static group => (Count: group.Count(), FirstLine: group.Min(static row => row.LineNumber)),
+                StringComparer.Ordinal);
 
         var orderedRows = potentialRows
-            .Select(row => row with { OccurrenceCount = occurrenceCounts[row.SuggestedPattern] })
+            .Select(row => row with { OccurrenceCount = patternStats[row.SuggestedPattern].Count })
             .OrderByDescending(static row => row.OccurrenceCount)
+            .ThenBy(row => patternStats[row.SuggestedPattern].FirstLine)
+            .ThenBy(static row => row.LineNumber)
             .ToList();
 
         return new PreviewPotentialRulesResult(orderedRows, parse.Errors, parse.Warnings);
@@ -96,7 +101,7 @@ public sealed record PotentialRuleRow(
     decimal Amount,
     string SuggestedPattern,
     Guid? SuggestedCategoryId,
-    int OccurrenceCount = 0);
+    int OccurrenceCount);
 
 public sealed record PreviewPotentialRulesResult(
     IReadOnlyList<PotentialRuleRow> PotentialRows,

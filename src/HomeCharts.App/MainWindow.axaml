@@ -434,12 +434,13 @@
                                 <Border Grid.Row="1" Background="#111827" BorderBrush="#334155" BorderThickness="1" CornerRadius="10" Padding="12" MinHeight="280">
                                     <Grid RowDefinitions="Auto,*" RowSpacing="10">
                                         <Border Background="#0B1223" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8" Padding="8,6">
-                                            <Grid ColumnDefinitions="110,*,110,190,96" ColumnSpacing="10">
+                                            <Grid ColumnDefinitions="110,56,*,110,190,96" ColumnSpacing="10">
                                                 <TextBlock Text="Date" Foreground="#94A3B8" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="1" Text="Description / Match String" Foreground="#94A3B8" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="2" Text="Amount" Foreground="#94A3B8" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="3" Text="Expense Category" Foreground="#94A3B8" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                                                <TextBlock Grid.Column="4" Text="Action" Foreground="#94A3B8" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="1" Text="Count" Foreground="#94A3B8" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="2" Text="Description / Match String" Foreground="#94A3B8" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="3" Text="Amount" Foreground="#94A3B8" FontWeight="SemiBold" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="4" Text="Expense Category" Foreground="#94A3B8" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                                                <TextBlock Grid.Column="5" Text="Action" Foreground="#94A3B8" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                             </Grid>
                                         </Border>
 
@@ -462,9 +463,10 @@
                                                                     <Setter Property="BorderBrush" Value="#3B82F6"/>
                                                                 </Style>
                                                             </Border.Styles>
-                                                            <Grid ColumnDefinitions="110,*,110,190,96" ColumnSpacing="10" VerticalAlignment="Center">
+                                                            <Grid ColumnDefinitions="110,56,*,110,190,96" ColumnSpacing="10" VerticalAlignment="Center">
                                                                 <TextBlock Text="{Binding BookingDateText}" Foreground="#CBD5E1" VerticalAlignment="Center"/>
-                                                                <TextBox Grid.Column="1"
+                                                                <TextBlock Grid.Column="1" Text="{Binding OccurrenceText}" Foreground="#CBD5E1" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                                <TextBox Grid.Column="2"
                                                                          Text="{Binding Description}"
                                                                          Watermark="Type matching string..."
                                                                          Background="#111827"
@@ -472,8 +474,8 @@
                                                                          Foreground="#E2E8F0"
                                                                          VerticalContentAlignment="Center"
                                                                          Padding="10,6"/>
-                                                                <TextBlock Grid.Column="2" Text="{Binding AmountText}" Foreground="#CBD5E1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-                                                                <ComboBox Grid.Column="3"
+                                                                <TextBlock Grid.Column="3" Text="{Binding AmountText}" Foreground="#CBD5E1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                                                                <ComboBox Grid.Column="4"
                                                                           ItemsSource="{Binding Categories}"
                                                                           SelectedItem="{Binding SelectedCategory}"
                                                                           MinWidth="180"
@@ -484,7 +486,7 @@
                                                                         </DataTemplate>
                                                                     </ComboBox.ItemTemplate>
                                                                 </ComboBox>
-                                                                <Button Grid.Column="4"
+                                                                <Button Grid.Column="5"
                                                                         Classes="finance-primary"
                                                                         Content="Save"
                                                                         Command="{Binding SaveCommand}"

@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Windows.Input;
 using HomeCharts.Application.UseCases;
 
@@ -20,6 +21,7 @@ public sealed class PotentialRuleRowViewModel : ObservableObject
         RowKey = row.RowKey;
         BookingDateText = row.BookingDate.ToString("yyyy-MM-dd");
         AmountText = row.Amount.ToString("0.00");
+        OccurrenceText = "×" + row.OccurrenceCount.ToString(CultureInfo.InvariantCulture);
         Categories = categories;
         _suggestedPattern = row.SuggestedPattern;
         _suggestedCategoryId = row.SuggestedCategoryId;
@@ -35,6 +37,7 @@ public sealed class PotentialRuleRowViewModel : ObservableObject
     public string RowKey { get; }
     public string BookingDateText { get; }
     public string AmountText { get; }
+    public string OccurrenceText { get; }
     public IReadOnlyList<CategoryOptionViewModel> Categories { get; }
     public ICommand SaveCommand => _saveCommand;
 
